@@ -7,7 +7,11 @@
 #include "bitcoin-config.h"
 #endif
 
+
+
 #include "init.h"
+
+#include "okcoin_log.h"
 
 #include "addrman.h"
 #include "checkpoints.h"
@@ -145,6 +149,12 @@ void Shutdown()
     if (pwalletMain)
         delete pwalletMain;
 #endif
+
+//OKCoin记录tx
+#ifdef OKCOIN_LOG
+    OKCoin_Log_deInit();
+#endif
+
     LogPrintf("Shutdown : done\n");
 }
 
@@ -1047,6 +1057,11 @@ bool AppInit2(boost::thread_group& threadGroup)
            addrman.size(), GetTimeMillis() - nStart);
 
     // ********************************************************* Step 11: start node
+
+//OKCoin记录tx
+#ifdef OKCOIN_LOG
+    OKCoin_Log_init();
+#endif
 
     if (!CheckDiskSpace())
         return false;

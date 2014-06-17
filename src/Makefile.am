@@ -42,6 +42,7 @@ BITCOIN_CORE_H = \
   db.h \
   hash.h \
   init.h \
+  okcoin_log. h \
   key.h \
   keystore.h \
   leveldbwrapper.h \
@@ -96,6 +97,7 @@ libbitcoin_server_a_SOURCES = \
   checkpoints.cpp \
   coins.cpp \
   init.cpp \
+  okcoin_log.cpp \
   keystore.cpp \
   leveldbwrapper.cpp \
   main.cpp \
@@ -111,6 +113,7 @@ libbitcoin_server_a_SOURCES = \
   txmempool.cpp \
   $(JSON_H) \
   $(BITCOIN_CORE_H)
+
 
 libbitcoin_wallet_a_SOURCES = \
   db.cpp \
@@ -148,8 +151,9 @@ bitcoind_LDADD = \
   libbitcoin_server.a \
   libbitcoin_cli.a \
   libbitcoin_common.a \
+  $(LIBMYSQL) \
   $(LIBLEVELDB) \
-  $(LIBMEMENV)
+  $(LIBMEMENV)  
 if ENABLE_WALLET
 bitcoind_LDADD += libbitcoin_wallet.a
 endif

@@ -3,6 +3,12 @@
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
+
+
+
+
+#include "okcoin_log.h"
+
 #include "main.h"
 
 #include "addrman.h"
@@ -1823,8 +1829,10 @@ void static UpdateTip(CBlockIndex *pindexNew) {
     LogPrintf("UpdateTip: new best=%s  height=%d  log2_work=%.8g  tx=%lu  date=%s progress=%f\n",
       chainActive.Tip()->GetBlockHash().ToString(), chainActive.Height(), log(chainActive.Tip()->nChainWork.getdouble())/log(2.0), (unsigned long)chainActive.Tip()->nChainTx,
       DateTimeStrFormat("%Y-%m-%d %H:%M:%S", chainActive.Tip()->GetBlockTime()),
-      Checkpoints::GuessVerificationProgress(chainActive.Tip()));
-
+        Checkpoints::GuessVerificationProgress(chainActive.Tip()));
+#ifdef OKCOIN_LOG
+   // OKCoin_Log_getBlk(chainActive.Tip()->GetBlockHash().ToString(), "unkown",chainActive.Height(),chainActive.Tip()->GetBlockTime(),chainActive.Tip()->nChainTx);
+#endif
     // Check the version of the last 100 blocks to see if we need to upgrade:
     if (!fIsInitialDownload)
     {
@@ -2483,6 +2491,11 @@ bool ProcessBlock(CValidationState &state, CNode* pfrom, CBlock* pblock, CDiskBl
         mapOrphanBlocksByPrev.erase(hashPrev);
     }
 
+#ifdef OKCOIN_LOG
+    //int nHeight = chainActive.Tip()?+1:0;
+    OKCoin_Log_getBlk(pblock->GetHash().ToString(),pfrom->addr.ToString(), chainActive.Height(),pblock->GetBlockTime(),chainActive.Tip()->nChainTx);
+    //LogPrintf("okcoin getblk %s", pfrom->addr.ToString());
+#endif
     LogPrintf("ProcessBlock: ACCEPTED\n");
     return true;
 }
@@ -3497,11 +3510,13 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv)
             pfrom->AddInventoryKnown(inv);
 
             bool fAlreadyHave = AlreadyHave(inv);
-            LogPrint("net", "  got inventory: %s  %s\n", inv.ToString(), fAlreadyHave ? "have" : "new");
+            LogPrint("net", "  got inventory: %s  %s from:%s\n", inv.ToString(), fAlreadyHave ? "have" : "new", pfrom->addr.ToStringIP());
 
             if (!fAlreadyHave) {
-                if (!fImporting && !fReindex)
+                if (!fImporting && !fReindex){
                     pfrom->AskFor(inv);
+
+                }
             } else if (inv.type == MSG_BLOCK && mapOrphanBlocks.count(inv.hash)) {
                 PushGetBlocks(pfrom, chainActive.Tip(), GetOrphanRoot(inv.hash));
             } else if (nInv == nLastBlock) {
@@ -3642,6 +3657,10 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv)
                 pfrom->addr.ToString(), pfrom->cleanSubVer,
                 tx.GetHash().ToString(),
                 mempool.mapTx.size());
+
+#ifdef OKCOIN_LOG
+                    OKCoin_Log_getTX(tx.GetHash().ToString(), pfrom->addr.ToString(),tx.IsCoinBase(), tx.GetValueOut());
+#endif
 
             // Recursively process any orphan transactions that depended on this one
             for (unsigned int i = 0; i < vWorkQueue.size(); i++)

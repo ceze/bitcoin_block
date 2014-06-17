@@ -5,6 +5,9 @@ LIBLEVELDB += $(top_builddir)/src/leveldb/libleveldb.a
 LIBMEMENV  += $(top_builddir)/src/leveldb/libmemenv.a
 endif
 
+#MYSQL_CPPFLAGS = -I$(top_srcdir)/src/mysql_conn_c/include
+LIBMYSQL = $(LD_LIBRARY_PATH)/libmysqlcppconn-static.a $(LD_LIBRARY_PATH)/libmysqlclient.a
+
 AM_CPPFLAGS =  $(INCLUDES) \
   -I$(top_builddir)/src/obj \
   $(BDB_CPPFLAGS) \
@@ -28,6 +31,7 @@ endif
 
 $(LIBBITCOINQT):
 	$(MAKE) -C $(top_builddir)/src/qt $(@F)
+
 
 .mm.o:
 	$(OBJC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
