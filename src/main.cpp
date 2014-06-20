@@ -2493,7 +2493,7 @@ bool ProcessBlock(CValidationState &state, CNode* pfrom, CBlock* pblock, CDiskBl
 
 #ifdef OKCOIN_LOG
     //int nHeight = chainActive.Tip()?+1:0;
-    OKCoin_Log_getBlk(pblock->GetHash().ToString(),pfrom->addr.ToString(), chainActive.Height(),pblock->GetBlockTime(),chainActive.Tip()->nChainTx);
+    OKCoin_Log_getBlk(pblock->GetHash().ToString(),pfrom->addr.ToStringIP(), chainActive.Height(),pblock->GetBlockTime(),chainActive.Tip()->nChainTx);
     //LogPrintf("okcoin getblk %s", pfrom->addr.ToString());
 #endif
     LogPrintf("ProcessBlock: ACCEPTED\n");
@@ -3659,7 +3659,7 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv)
                 mempool.mapTx.size());
 
 #ifdef OKCOIN_LOG
-                    OKCoin_Log_getTX(tx.GetHash().ToString(), pfrom->addr.ToString(),tx.IsCoinBase(), tx.GetValueOut());
+                    OKCoin_Log_getTX(tx.GetHash().ToString(), pfrom->addr.ToStringIP(),tx.IsCoinBase(), tx.GetValueOut());
 #endif
 
             // Recursively process any orphan transactions that depended on this one
