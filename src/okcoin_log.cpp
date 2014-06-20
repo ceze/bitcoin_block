@@ -12,8 +12,8 @@
 #define DB_NAME			"blockchain"
 #define DB_PORT			3306
 
-//using namespace sql;
-//using namespace sql::mysql;
+using namespace sql;
+using namespace sql::mysql;
 static sql::Connection *mysqlConn;
 static sql::PreparedStatement *pstmtTx;
 static sql::PreparedStatement *pstmtBlk;

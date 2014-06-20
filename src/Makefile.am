@@ -82,10 +82,28 @@ JSON_H = \
   json/json_spirit_writer.h \
   json/json_spirit_writer_template.h
 
+MYSQL_H = \
+  mysql_conn_lib/include/mysql_connection.h \
+  mysql_conn_lib/include/mysql_driver.h \
+  mysql_conn_lib/include/cppconn/build_config.h \
+  mysql_conn_lib/include/cppconn/config.h \
+  mysql_conn_lib/include/cppconn/connection.h \
+  mysql_conn_lib/include/cppconn/datatype.h \
+  mysql_conn_lib/include/cppconn/driver.h \
+  mysql_conn_lib/include/cppconn/exception.h \
+  mysql_conn_lib/include/cppconn/metadata.h \
+  mysql_conn_lib/include/cppconn/parameter_metadata.h \
+  mysql_conn_lib/include/cppconn/prepared_statement.h \
+  mysql_conn_lib/include/cppconn/resultset_metadata.h \
+  mysql_conn_lib/include/cppconn/resultset.h \
+  mysql_conn_lib/include/cppconn/sqlstring.h \
+  mysql_conn_lib/include/cppconn/statement.h \
+  mysql_conn_lib/include/cppconn/warning.h 
+
 obj/build.h: FORCE
 	@$(MKDIR_P) $(abs_top_builddir)/src/obj
 	@$(top_srcdir)/share/genbuild.sh $(abs_top_builddir)/src/obj/build.h \
-	  $(abs_top_srcdir)
+	$(abs_top_srcdir)
 version.o: obj/build.h
 
 libbitcoin_server_a_SOURCES = \
@@ -112,7 +130,9 @@ libbitcoin_server_a_SOURCES = \
   txdb.cpp \
   txmempool.cpp \
   $(JSON_H) \
-  $(BITCOIN_CORE_H)
+  #$(BITCOIN_CORE_H) \
+  $(MYSQL_H)  
+
 
 
 libbitcoin_wallet_a_SOURCES = \

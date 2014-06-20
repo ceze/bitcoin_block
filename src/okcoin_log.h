@@ -26,7 +26,8 @@
   (and mysql_connection.h). This will reduce your build time!
 */
   // c++
-//#include "mysql_driver.h"
+//#include "mysql_conn_lib/include/mysql_driver.h"
+
 #include "mysql_connection.h"
 #include <cppconn/driver.h>
 #include <cppconn/exception.h>
