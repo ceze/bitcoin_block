@@ -12,6 +12,7 @@ MYSQL_CONN_PATH =/usr/lib/mysql-workbench
 LIBMYSQL = -lmysqlcppconn -lmysqlclient 
 #$(LD_LIBRARY_PATH)/libmysqlclient.so
 
+
 AM_CPPFLAGS =  $(INCLUDES) \
   -I$(top_builddir)/src/obj \
   $(BDB_CPPFLAGS) \

@@ -10,7 +10,6 @@
 #define DB_USER	 		"root"
 #define DB_PASSWORD		"root"
 #define DB_NAME			"blockchain"
-#define DB_PORT			3306
 
 using namespace sql;
 using namespace sql::mysql;
@@ -38,12 +37,19 @@ bool OKCoin_Log_init(){
 	}
 #if LOG2DB
 	/* Create a connection */
+	//load config
+	std::string db_server= GetArg("-okdbhost", DB_SERVER);
+	std::string db_user = GetArg("-okdbuser", DB_USER);
+	std::string db_password = GetArg("-okdbpassword", DB_PASSWORD);
+	std::string db_name= GetArg("-okdbname", DB_NAME);
+	
+	LogPrint("okcoin_log", "OKCoin_Log_init loadconfig ok_db_host = %s\n", db_server);
 
   	sql::Driver *driver = get_driver_instance();
-  	mysqlConn = driver->connect(DB_SERVER, DB_USER, DB_PASSWORD);
+  	mysqlConn = driver->connect(db_server,db_user, db_password);
   	fInited = mysqlConn? true: false;
   	assert(mysqlConn != NULL);
-  	mysqlConn->setSchema(DB_NAME);
+  	mysqlConn->setSchema(db_name);
 	LogPrint("okcoin_log", "OKCoin_Log_init log2mysqldb result = %s \n", fInited ? "success":"fails");
 	/*
 extern  "C"{
