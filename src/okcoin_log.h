@@ -59,8 +59,9 @@ extern  "C"{
 bool OKCoin_Log_init();
 bool OKCoin_Log_deInit();
 
-bool OKCoin_Log_getTX(std::string hash, std::string fromIp, bool isCoinbase, int64_t valueOut);
-bool OKCoin_Log_getBlk(std::string hash, std::string fromIp, unsigned long height, int64_t bc_time, unsigned long tx_count);
+bool OKCoin_Log_getTX(std::string hash, std::string fromIp, bool isCoinbase, int64_t valueOut, int64_t valueIn, unsigned int sz);
+bool OKCoin_Log_getBlk(std::string hash, std::string fromIp, unsigned long height, int64_t bc_time, unsigned long tx_count,
+	unsigned int sz, int64_t totalOut, int64_t totalIn);
 
 
 #endif

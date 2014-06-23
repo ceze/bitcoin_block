@@ -17,6 +17,7 @@ void COutPoint::print() const
     LogPrintf("%s\n", ToString());
 }
 
+
 CTxIn::CTxIn(COutPoint prevoutIn, CScript scriptSigIn, unsigned int nSequenceIn)
 {
     prevout = prevoutIn;
@@ -116,6 +117,17 @@ int64_t CTransaction::GetValueOut() const
             throw std::runtime_error("CTransaction::GetValueOut() : value out of range");
     }
     return nValueOut;
+}
+
+//out value of index n in txout / chenzs 2014/06/23
+int64_t CTransaction::GetValueOut(int n) const{
+    if(n < 0 || n >= vout.size()){
+        throw std::runtime_error("CTransaction::GetValueOut(n) : index out of txout");
+    }
+    else{
+        CTxOut txout = vout[n];
+        return txout.nValue;
+    }
 }
 
 double CTransaction::ComputePriority(double dPriorityInputs, unsigned int nTxSize) const
@@ -286,3 +298,28 @@ void CBlock::print() const
         LogPrintf("%s ", vMerkleTree[i].ToString());
     LogPrintf("\n");
 }
+
+
+//chenzs 2014/06/22
+int64_t CBlock::GetTotalValueOut() const
+{
+    int64_t nValueOut = 0;
+    BOOST_FOREACH(const CTransaction& tx, vtx)
+    {
+        nValueOut += tx.GetValueOut();
+    }
+    return nValueOut;
+}
+/*
+ int64_t GetTotalValueIn() const{
+    int64_t nValueIn = 0;
+     BOOST_FOREACH(const CTransaction& tx, vtx)
+    {
+        CCoinsViewCache view(*pcoinsTip, true);
+        if(view.HaveInputs(tx)){
+            nValueIn += view.GetValueIn(tx);
+        }
+    }
+    return nValueIn;
+ }
+ */

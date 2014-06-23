@@ -51,6 +51,7 @@ bool OKCoin_Log_init(){
   	assert(mysqlConn != NULL);
   	mysqlConn->setSchema(db_name);
 	LogPrint("okcoin_log", "OKCoin_Log_init log2mysqldb result = %s \n", fInited ? "success":"fails");
+
 	/*
 extern  "C"{
 	mysql_init(&mMysql);
@@ -111,7 +112,7 @@ extern  "C"{
 }
 
 
-bool OKCoin_Log_getTX(std::string hash, std::string fromIp, bool isCoinbase, int64_t valueOut){
+bool OKCoin_Log_getTX(std::string hash, std::string fromIp, bool isCoinbase, int64_t valueOut, int64_t valueIn, unsigned int txSize){
 #if LOG2DB
 	if(!fInited ){
 		LogPrint("okcoin_log", "okcoin_log Insert to db fails, connection no inited \n");
@@ -120,7 +121,8 @@ bool OKCoin_Log_getTX(std::string hash, std::string fromIp, bool isCoinbase, int
 	int ret = 0;
 	
 	if(!pstmtTx){
-		pstmtTx =  mysqlConn->prepareStatement("Insert Into tb_tx(hash,bc_ip,is_coinbase,v_out,bc_time,bc_count) Values(?,?,?,?,now(),0)");
+		//pstmtTx =  mysqlConn->prepareStatement("Insert Into tb_tx(hash,bc_ip,is_coinbase,v_out,v_in,size,bc_time,bc_count) Values(?,?,?,?,?,?,date_add(now(),interval -8 hour),0)");
+		pstmtTx = mysqlConn->prepareStatement("CALL InsertTx(?,?,?,?,?,?, /*date_add(now(),interval -8 hour),0,*/ @txid)");
 	}
 	
 	assert(pstmtTx != NULL);
@@ -129,7 +131,21 @@ bool OKCoin_Log_getTX(std::string hash, std::string fromIp, bool isCoinbase, int
 		pstmtTx->setString(2, fromIp);
 		pstmtTx->setBoolean(3,isCoinbase);
 		pstmtTx->setInt64(4,valueOut);
+		pstmtTx->setInt64(5,valueIn);
+		pstmtTx->setUInt(6,txSize);
 		ret = pstmtTx->executeUpdate();
+
+		std::auto_ptr<PreparedStatement> prepSelect(mysqlConn->prepareStatement("select @txid as tid"));  
+    	std::auto_ptr<ResultSet>lpRes(prepSelect->executeQuery());  
+
+    	while(lpRes->next())  
+    	{  
+       		 int ID = lpRes->getInt(1);  
+       		 LogPrint("okcoin_log", "okcoin inserttx id= %d\n",ID);
+       	}
+
+
+
 	}catch(sql::SQLException &e){
 		LogPrint("okcoin_log", "okcoin_log Insert tx err %s \n", e.what());
 	}
@@ -147,11 +163,13 @@ bool OKCoin_Log_getTX(std::string hash, std::string fromIp, bool isCoinbase, int
 	return ret > 0;
 }
 
-bool OKCoin_Log_getBlk(std::string hash, std::string fromIp, unsigned long height, int64_t bc_time, unsigned long tx_count){
+bool OKCoin_Log_getBlk(std::string hash, std::string fromIp, unsigned long height, int64_t bc_time, unsigned long tx_count, unsigned int blkSize,
+	int64_t totalOut,int64_t totalIn){
 int ret = 0;
 #if LOG2DB
 	if(!pstmtBlk){
-		pstmtBlk = mysqlConn->prepareStatement("Insert Into tb_blk(hash, bc_ip,height,tx_count,bc_time) Values(?,?,?,?,?)");
+		pstmtBlk = mysqlConn->prepareStatement("Insert Into tb_blk(hash, bc_ip,height,tx_count,bc_time,size,v_out, v_in) Values(?,?,?,?,?,?,?,?)");
+		
 	}
 	assert(pstmtBlk != NULL);
 	try{
@@ -160,7 +178,12 @@ int ret = 0;
 		pstmtBlk->setUInt64(3,height);
 		pstmtBlk->setUInt64(4,tx_count);
 		pstmtBlk->setDateTime(5,DateTimeStrFormat("%Y-%m-%d %H:%M:%S", bc_time));
+		pstmtBlk->setUInt(6,blkSize);
+		pstmtBlk->setUInt64(7,totalOut);
+		pstmtBlk->setUInt64(8, totalIn);
 		ret = pstmtBlk->executeUpdate();
+
+
 	}catch(sql::SQLException &e){
 		LogPrint("okcoin_log", "okcoin_log Insert blk err %s \n", e.what());
 	}

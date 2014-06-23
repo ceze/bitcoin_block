@@ -57,10 +57,12 @@ public:
     const CTransaction* ptx;
     unsigned int n;
 
+
     CInPoint() { SetNull(); }
     CInPoint(const CTransaction* ptxIn, unsigned int nIn) { ptx = ptxIn; n = nIn; }
     void SetNull() { ptx = NULL; n = (unsigned int) -1; }
     bool IsNull() const { return (ptx == NULL && n == (unsigned int) -1); }
+    
 };
 
 /** An input of a transaction.  It contains the location of the previous
@@ -108,6 +110,9 @@ public:
 
     std::string ToString() const;
     void print() const;
+
+    //chenzs 2014/06/23
+   // int64_t GetValueIn() const;
 };
 
 
@@ -223,9 +228,10 @@ public:
 
     // Return sum of txouts.
     int64_t GetValueOut() const;
+    //out value of index n in txout / chenzs 2014/06/23
+    int64_t GetValueOut(int n) const;
     // GetValueIn() is a method on CCoinsViewCache, because
     // inputs must be known to compute value in.
-
     // Compute priority, given priority of inputs and (optionally) tx size
     double ComputePriority(double dPriorityInputs, unsigned int nTxSize=0) const;
 
@@ -449,7 +455,9 @@ public:
     std::vector<uint256> GetMerkleBranch(int nIndex) const;
     static uint256 CheckMerkleBranch(uint256 hash, const std::vector<uint256>& vMerkleBranch, int nIndex);
     void print() const;
-};
+    //chenzs 2014/06/22
+    int64_t GetTotalValueOut() const;
+ };
 
 
 /** Describes a place in the block chain to another node such that if the
