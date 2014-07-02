@@ -63,6 +63,8 @@ void TxToJSON(const CTransaction& tx, const uint256 hashBlock, Object& entry)
 {
     entry.push_back(Pair("txid", tx.GetHash().GetHex()));
     entry.push_back(Pair("version", tx.nVersion));
+    int sz = tx.GetSerializeSize(SER_NETWORK, CTransaction::CURRENT_VERSION);
+    entry.push_back(Pair("size",  sz));//chenzs
     entry.push_back(Pair("locktime", (boost::int64_t)tx.nLockTime));
     Array vin;
     BOOST_FOREACH(const CTxIn& txin, tx.vin)
@@ -76,19 +78,16 @@ void TxToJSON(const CTransaction& tx, const uint256 hashBlock, Object& entry)
             in.push_back(Pair("vout", (boost::int64_t)txin.prevout.n));
 
             //chenzs 2014/07/02 get prevout info
-          
             CTransaction txPrevOut;
             uint256 hashBlock = 0;
-            if (GetTransaction(txin.prevout.hash, txPrevOut, hashBlock, false))
+            if(GetTransaction(txin.prevout.hash, txPrevOut, hashBlock, true))
             {
                 Object preOut;
                 const CTxOut& txout = txPrevOut.vout[txin.prevout.n];
-                TxoutToJSON(txout, preOut, 0);
+                TxoutToJSON(txout, preOut, txin.prevout.n);
                 in.push_back(Pair("prev_out", preOut));
             }
-
             
-           
             Object o;
             o.push_back(Pair("asm", txin.scriptSig.ToString()));
             o.push_back(Pair("hex", HexStr(txin.scriptSig.begin(), txin.scriptSig.end())));
