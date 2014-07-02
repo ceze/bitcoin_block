@@ -57,7 +57,6 @@ public:
     const CTransaction* ptx;
     unsigned int n;
 
-
     CInPoint() { SetNull(); }
     CInPoint(const CTransaction* ptxIn, unsigned int nIn) { ptx = ptxIn; n = nIn; }
     void SetNull() { ptx = NULL; n = (unsigned int) -1; }

@@ -5,11 +5,13 @@ LIBLEVELDB += $(top_builddir)/src/leveldb/libleveldb.a
 LIBMEMENV  += $(top_builddir)/src/leveldb/libmemenv.a
 endif
 
-LD_LIBRARY_PATH = /usr/lib/x86_64-linux-gnu
+LD_LIBRARY_PATH = /usr/local/mysql-5.6.17-osx10.7-x86_64/lib
 MYSQL_PATH = $(top_srcdir)/src/mysql_conn_lib
 MYSQL_CPPFLAGS = -I$(MYSQL_PATH)/include
 MYSQL_CONN_PATH =/usr/lib/mysql-workbench
-LIBMYSQL = -lmysqlcppconn -lmysqlclient 
+#LIBMYSQL = -lmysqlcppconn -lmysqlclient 
+LIBMYSQL = $(LD_LIBRARY_PATH)/libmysqlcppconn-static.a $(LD_LIBRARY_PATH)/libmysqlclient.a
+
 #$(LD_LIBRARY_PATH)/libmysqlclient.so
 
 

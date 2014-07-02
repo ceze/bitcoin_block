@@ -51,6 +51,14 @@ void ScriptPubKeyToJSON(const CScript& scriptPubKey, Object& out, bool fIncludeH
     out.push_back(Pair("addresses", a));
 }
 
+void TxoutToJSON(const CTxOut& txout, Object& out, unsigned int i){
+    out.push_back(Pair("value", ValueFromAmount(txout.nValue)));
+    out.push_back(Pair("n", (boost::int64_t)i));
+    Object o;
+    ScriptPubKeyToJSON(txout.scriptPubKey, o, true);
+    out.push_back(Pair("scriptPubKey", o));
+}
+
 void TxToJSON(const CTransaction& tx, const uint256 hashBlock, Object& entry)
 {
     entry.push_back(Pair("txid", tx.GetHash().GetHex()));
@@ -66,6 +74,21 @@ void TxToJSON(const CTransaction& tx, const uint256 hashBlock, Object& entry)
         {
             in.push_back(Pair("txid", txin.prevout.hash.GetHex()));
             in.push_back(Pair("vout", (boost::int64_t)txin.prevout.n));
+
+            //chenzs 2014/07/02 get prevout info
+          
+            CTransaction txPrevOut;
+            uint256 hashBlock = 0;
+            if (GetTransaction(txin.prevout.hash, txPrevOut, hashBlock, false))
+            {
+                Object preOut;
+                const CTxOut& txout = txPrevOut.vout[txin.prevout.n];
+                TxoutToJSON(txout, preOut, 0);
+                in.push_back(Pair("prev_out", preOut));
+            }
+
+            
+           
             Object o;
             o.push_back(Pair("asm", txin.scriptSig.ToString()));
             o.push_back(Pair("hex", HexStr(txin.scriptSig.begin(), txin.scriptSig.end())));
@@ -79,12 +102,16 @@ void TxToJSON(const CTransaction& tx, const uint256 hashBlock, Object& entry)
     for (unsigned int i = 0; i < tx.vout.size(); i++)
     {
         const CTxOut& txout = tx.vout[i];
+        
         Object out;
+        /*
         out.push_back(Pair("value", ValueFromAmount(txout.nValue)));
         out.push_back(Pair("n", (boost::int64_t)i));
         Object o;
         ScriptPubKeyToJSON(txout.scriptPubKey, o, true);
         out.push_back(Pair("scriptPubKey", o));
+        */
+        TxoutToJSON(txout, out, i); //chenzs 2014/07/02
         vout.push_back(out);
     }
     entry.push_back(Pair("vout", vout));

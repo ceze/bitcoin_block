@@ -2503,10 +2503,12 @@ bool ProcessBlock(CValidationState &state, CNode* pfrom, CBlock* pblock, CDiskBl
             nTotalValueIn += view.GetValueIn(tx);
         }
     }
-    nTotalValueIn = nTotalValueIn == 0 ? nTotalValueOut : nTotalValueIn;
-    OKCoin_Log_getBlk(pblock->GetHash().ToString(),pfrom->addr.ToStringIP(), chainActive.Height(),pblock->GetBlockTime(),chainActive.Tip()->nTx,nBlockSize,
-       nTotalValueOut , nTotalValueIn);
+   // nTotalValueIn = nTotalValueIn == 0 ? nTotalValueOut : nTotalValueIn;
+   // OKCoin_Log_getBlk(pblock->GetHash().ToString(),pfrom->addr.ToStringIP(), chainActive.Height(),pblock->GetBlockTime(),chainActive.Tip()->nTx,nBlockSize,nTotalValueOut , nTotalValueIn);
     //LogPrintf("okcoin getblk %s", pfrom->addr.ToString());
+    // 更新tx记录
+    OKCoin_Log_getBlk(*pblock, pfrom->addr.ToStringIP(), chainActive.Height(), nBlockSize, nTotalValueOut, nTotalValueIn);
+
 #endif
     LogPrintf("ProcessBlock: ACCEPTED\n");
     return true;
@@ -3692,8 +3694,9 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv)
                      }
                      */
                     nTotalIn = nTotalIn == 0? nValueOut : nTotalIn;
-                    OKCoin_Log_getTX(tx.GetHash().ToString(), pfrom->addr.ToStringIP(),tx.IsCoinBase(), nValueOut,nTotalIn, sz);
-#endif
+                    //OKCoin_Log_getTX(tx.GetHash().ToString(), pfrom->addr.ToStringIP(),tx.IsCoinBase(), nValueOut,nTotalIn, sz);
+                    OKCoin_Log_getTxWhitOut(tx, pfrom->addr.ToStringIP(),nValueOut,nTotalIn, sz);
+#endif  
 
             // Recursively process any orphan transactions that depended on this one
             for (unsigned int i = 0; i < vWorkQueue.size(); i++)
