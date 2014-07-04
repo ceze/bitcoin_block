@@ -51,15 +51,16 @@ void ScriptPubKeyToJSON(const CScript& scriptPubKey, Object& out, bool fIncludeH
     out.push_back(Pair("addresses", a));
 }
 
-void TxoutToJSON(const CTxOut& txout, Object& out, unsigned int i){
-    out.push_back(Pair("value", ValueFromAmount(txout.nValue)));
+void TxoutToJSON(const CTxOut& txout, Object& out, unsigned int i, bool fInfo){
+    //out.push_back(Pair("value", ValueFromAmount(txout.nValue)));
+    out.push_back(Pair("value", txout.nValue));
     out.push_back(Pair("n", (boost::int64_t)i));
     Object o;
-    ScriptPubKeyToJSON(txout.scriptPubKey, o, true);
+    ScriptPubKeyToJSON(txout.scriptPubKey, o, fInfo);
     out.push_back(Pair("scriptPubKey", o));
 }
 
-void TxToJSON(const CTransaction& tx, const uint256 hashBlock, Object& entry)
+void TxToJSON(const CTransaction& tx, const uint256 hashBlock, Object& entry, bool fInfo)
 {
     entry.push_back(Pair("txid", tx.GetHash().GetHex()));
     entry.push_back(Pair("version", tx.nVersion));
@@ -84,14 +85,16 @@ void TxToJSON(const CTransaction& tx, const uint256 hashBlock, Object& entry)
             {
                 Object preOut;
                 const CTxOut& txout = txPrevOut.vout[txin.prevout.n];
-                TxoutToJSON(txout, preOut, txin.prevout.n);
+                TxoutToJSON(txout, preOut, txin.prevout.n, fInfo);
                 in.push_back(Pair("prev_out", preOut));
             }
-            
-            Object o;
-            o.push_back(Pair("asm", txin.scriptSig.ToString()));
-            o.push_back(Pair("hex", HexStr(txin.scriptSig.begin(), txin.scriptSig.end())));
-            in.push_back(Pair("scriptSig", o));
+            //chenzs 2014/07/04
+            if(fInfo){
+                Object o;
+                o.push_back(Pair("asm", txin.scriptSig.ToString()));
+                o.push_back(Pair("hex", HexStr(txin.scriptSig.begin(), txin.scriptSig.end())));
+                in.push_back(Pair("scriptSig", o));
+            }
         }
         in.push_back(Pair("sequence", (boost::int64_t)txin.nSequence));
         vin.push_back(in);
@@ -110,7 +113,15 @@ void TxToJSON(const CTransaction& tx, const uint256 hashBlock, Object& entry)
         ScriptPubKeyToJSON(txout.scriptPubKey, o, true);
         out.push_back(Pair("scriptPubKey", o));
         */
-        TxoutToJSON(txout, out, i); //chenzs 2014/07/02
+        
+        TxoutToJSON(txout, out, i, fInfo); //chenzs 2014/07/02
+        //增加是否支付spent 2014、07、03
+        bool isSpent = false;
+        CCoins coins;
+        pcoinsTip->GetCoins(tx.GetHash(), coins);
+        if(i >= coins.vout.size() || coins.vout[i].IsNull())
+            isSpent = true;
+        out.push_back(Pair("spent", isSpent));
         vout.push_back(out);
     }
     entry.push_back(Pair("vout", vout));
@@ -127,6 +138,7 @@ void TxToJSON(const CTransaction& tx, const uint256 hashBlock, Object& entry)
                 entry.push_back(Pair("confirmations", 1 + chainActive.Height() - pindex->nHeight));
                 entry.push_back(Pair("time", (boost::int64_t)pindex->nTime));
                 entry.push_back(Pair("blocktime", (boost::int64_t)pindex->nTime));
+                entry.push_back(Pair("blockheight", (boost::int64_t)pindex->nHeight));
             }
             else
                 entry.push_back(Pair("confirmations", 0));
@@ -217,7 +229,7 @@ Value getrawtransaction(const Array& params, bool fHelp)
 
     Object result;
     result.push_back(Pair("hex", strHex));
-    TxToJSON(tx, hashBlock, result);
+    TxToJSON(tx, hashBlock, result, true);
     return result;
 }
 
@@ -485,7 +497,7 @@ Value decoderawtransaction(const Array& params, bool fHelp)
     }
 
     Object result;
-    TxToJSON(tx, 0, result);
+    TxToJSON(tx, 0, result,true);
 
     return result;
 }

@@ -15,6 +15,7 @@ using namespace json_spirit;
 using namespace std;
 
 void ScriptPubKeyToJSON(const CScript& scriptPubKey, Object& out, bool fIncludeHex);
+void TxToJSON(const CTransaction& tx, const uint256 hashBlock, Object& entry, bool fInfo);
 
 double GetDifficulty(const CBlockIndex* blockindex)
 {
@@ -60,8 +61,12 @@ Object blockToJSON(const CBlock& block, const CBlockIndex* blockindex)
     result.push_back(Pair("version", block.nVersion));
     result.push_back(Pair("merkleroot", block.hashMerkleRoot.GetHex()));
     Array txs;
-    BOOST_FOREACH(const CTransaction&tx, block.vtx)
-        txs.push_back(tx.GetHash().GetHex());
+    BOOST_FOREACH(const CTransaction&tx, block.vtx){
+        //txs.push_back(tx.GetHash().GetHex());
+        Object oTx;
+        TxToJSON(tx, block.GetHash(), oTx,false);
+        txs.push_back(oTx);
+    }
     result.push_back(Pair("tx", txs));
     result.push_back(Pair("time", (boost::int64_t)block.GetBlockTime()));
     result.push_back(Pair("nonce", (boost::uint64_t)block.nNonce));
