@@ -77,7 +77,6 @@ void TxToJSON(const CTransaction& tx, const uint256 hashBlock, Object& entry, bo
         {
             in.push_back(Pair("txid", txin.prevout.hash.GetHex()));
             in.push_back(Pair("vout", (boost::int64_t)txin.prevout.n));
-
             //chenzs 2014/07/02 get prevout info
             CTransaction txPrevOut;
             uint256 hashBlock = 0;
@@ -88,6 +87,7 @@ void TxToJSON(const CTransaction& tx, const uint256 hashBlock, Object& entry, bo
                 TxoutToJSON(txout, preOut, txin.prevout.n, fInfo);
                 in.push_back(Pair("prev_out", preOut));
             }
+            
             //chenzs 2014/07/04
             if(fInfo){
                 Object o;
@@ -118,9 +118,18 @@ void TxToJSON(const CTransaction& tx, const uint256 hashBlock, Object& entry, bo
         //增加是否支付spent 2014、07、03
         bool isSpent = false;
         CCoins coins;
-        pcoinsTip->GetCoins(tx.GetHash(), coins);
-        if(i >= coins.vout.size() || coins.vout[i].IsNull())
+        LOCK(mempool.cs);
+        CCoinsViewMemPool view(*pcoinsTip, mempool);
+        if (view.GetCoins(tx.GetHash(), coins)){        
+            mempool.pruneSpent(tx.GetHash(), coins); // TODO: this should be done by the CCoinsViewMemPool
+        }
+        else{
+            pcoinsTip->GetCoins(tx.GetHash(), coins);//缓存没有记录，从数据库取
+        }
+
+        if(i >= coins.vout.size() || coins.vout[i].IsNull()){
             isSpent = true;
+        }    
         out.push_back(Pair("spent", isSpent));
         vout.push_back(out);
     }

@@ -49,7 +49,7 @@ double GetDifficulty(const CBlockIndex* blockindex)
 }
 
 
-Object blockToJSON(const CBlock& block, const CBlockIndex* blockindex)
+Object blockToJSON(const CBlock& block, const CBlockIndex* blockindex, bool fDecode)
 {
     Object result;
     result.push_back(Pair("hash", block.GetHash().GetHex()));
@@ -61,16 +61,23 @@ Object blockToJSON(const CBlock& block, const CBlockIndex* blockindex)
     result.push_back(Pair("version", block.nVersion));
     result.push_back(Pair("merkleroot", block.hashMerkleRoot.GetHex()));
     Array txs;
+
+
     BOOST_FOREACH(const CTransaction&tx, block.vtx){
-        //txs.push_back(tx.GetHash().GetHex());
-        Object oTx;
-        TxToJSON(tx, block.GetHash(), oTx,false);
-        txs.push_back(oTx);
+        //chenzs 2014/07/05
+        if(!fDecode){
+            txs.push_back(tx.GetHash().GetHex());    
+        }else{
+            Object oTx;
+            TxToJSON(tx, block.GetHash(), oTx,false);
+            txs.push_back(oTx);
+        }
     }
+    
     result.push_back(Pair("tx", txs));
     result.push_back(Pair("time", (boost::int64_t)block.GetBlockTime()));
     result.push_back(Pair("nonce", (boost::uint64_t)block.nNonce));
-    result.push_back(Pair("bits", HexBits(block.nBits)));
+    result.push_back(Pair("bits", (boost::uint64_t)block.nBits));
     result.push_back(Pair("difficulty", GetDifficulty(blockindex)));
     result.push_back(Pair("chainwork", blockindex->nChainWork.GetHex()));
 
@@ -234,14 +241,15 @@ Value getblockhash(const Array& params, bool fHelp)
 
 Value getblock(const Array& params, bool fHelp)
 {
-    if (fHelp || params.size() < 1 || params.size() > 2)
+    if (fHelp || params.size() < 1 || params.size() > 3)
         throw runtime_error(
-            "getblock \"hash\" ( verbose )\n"
+            "getblock \"hash\" ( verbose ) ( decode )\n"
             "\nIf verbose is false, returns a string that is serialized, hex-encoded data for block 'hash'.\n"
             "If verbose is true, returns an Object with information about block <hash>.\n"
             "\nArguments:\n"
             "1. \"hash\"          (string, required) The block hash\n"
             "2. verbose           (boolean, optional, default=true) true for a json object, false for the hex encoded data\n"
+            "3. decode            (boolean, optional, default=false) true for transaction info. (base on verbose = true)"
             "\nResult (for verbose = true):\n"
             "{\n"
             "  \"hash\" : \"hash\",     (string) the block hash (same as provided)\n"
@@ -290,7 +298,11 @@ Value getblock(const Array& params, bool fHelp)
         return strHex;
     }
 
-    return blockToJSON(block, pblockindex);
+    bool fDecode = true;
+    if(params.size() > 2)
+        fDecode = params[2].get_bool();
+
+    return blockToJSON(block, pblockindex, fDecode);
 }
 
 Value gettxoutsetinfo(const Array& params, bool fHelp)

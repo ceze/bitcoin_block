@@ -145,6 +145,8 @@ extern  "C"{
 
 bool OKCoin_Log_getTxWhitOut(const CTransaction &tx, std::string fromIp,int64_t valueOut, int64_t valueIn, unsigned int sz){
 
+	assert(fInited == true);
+
 	int64_t txid = OKCoin_Log_getTX(tx.GetHash().ToString(), fromIp, tx.IsCoinBase(), valueOut,valueIn, sz, 
 		tx.nVersion, tx.vout.size(), tx.vin.size());
 	if(txid > 0){
@@ -210,6 +212,8 @@ IN tx_index, bigInt
 
 int OKCoin_Log_getTX(std::string hash, std::string fromIp, bool isCoinbase, int64_t valueOut, int64_t valueIn, unsigned int txSize, 
 	int ver, int out_sz, int in_sz){
+
+	assert(fInited == true);
 #if LOG2DB
 	if(!fInited ){
 		LogPrint("okcoin_log", "okcoin_log Insert to db fails, connection no inited \n");
@@ -298,6 +302,7 @@ IN vin  bigint
 
 bool OKCoin_Log_getBlk(const CBlock &block, std::string fromIp, unsigned long height,unsigned int size, int64_t totalOut, int64_t totalIn){
 	int ret = 0;
+	assert(fInited == true);
 #if LOG2DB
 	if(!pstmtBlk){
 		//pstmtBlk = mysqlConn->prepareStatement("Insert Into tb_blk(hash, bc_ip,height,tx_count,bc_time,size,v_out, v_in) Values(?,?,?,?,?,?,?,?)");
@@ -370,6 +375,8 @@ bool OKCoin_Log_getBlk(const CBlock &block, std::string fromIp, unsigned long he
 
 bool OKCoin_Log_getBlk(std::string hash, std::string fromIp, unsigned long height, int64_t bc_time, unsigned long tx_count, unsigned int blkSize,
 	int64_t totalOut,int64_t totalIn){
+
+	assert(fInited == true);
 int ret = 0;
 #if LOG2DB
 	if(!pstmtBlk){
