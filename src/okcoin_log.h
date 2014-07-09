@@ -7,12 +7,12 @@
 
 
 #define OKCOIN_LOG
-#define _MYSQL_DB_   //写到SQL数据库
+//#define _MYSQL_DB_   //写到SQL数据库
 
 #ifdef _MYSQL_DB_
 #define LOG2DB 			1
 #else
-#define LOG2DB 			0
+#define LOG2DB 			0 	//写到文件
 #endif 
 
 
@@ -52,6 +52,23 @@ extern  "C"{
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
 #include <boost/foreach.hpp>
+#define strprintf tfm::format
+#define OKCoinLogPrintf(...) OKCoinLogPrint(__VA_ARGS__)
+
+int OKCoinLogPrintStr(const std::string &str);
+
+#define MAKE_OKCOIN_LOG_FUNC(n)                                        \
+    template<TINYFORMAT_ARGTYPES(n)>                                          \
+    static inline int OKCoinLogPrint(const char* format, TINYFORMAT_VARARGS(n))  \
+    {                                                                         \
+        return OKCoinLogPrintStr(tfm::format(format, TINYFORMAT_PASSARGS(n))); \
+    }                                                                         \
+    
+TINYFORMAT_FOREACH_ARGNUM(MAKE_OKCOIN_LOG_FUNC)
+static inline int OKCoinLogPrint(const char* format)
+{
+    return LogPrintStr(format);
+}
 
 #endif
 

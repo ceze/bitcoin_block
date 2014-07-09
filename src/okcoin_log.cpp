@@ -27,15 +27,17 @@ static MYSQL  mMysql;
 */
 
 #else
-static boost::once_flag debugPrintInitFlag = BOOST_ONCE_INIT;
-static FILE* fileout = NULL;
-static boost::mutex* mutexDebugLog = NULL;
+//static boost::once_flag debugPrintInitFlag = BOOST_ONCE_INIT;
+static FILE* okcoinFileout = NULL;
+static boost::mutex* mutexOkcoinLog = NULL;
+#define  OKCOIN_LOG_FILENAME		"okcoin_tx.log"
 #endif
 
 static bool fInited = false;
 
 
 bool Update_TxInfo(int64_t height, int64_t bindex, std::string hash){
+#if LOG2DB
 	/*
 	 UpdateTransaction`(
 	IN height bigint,
@@ -56,6 +58,8 @@ bool Update_TxInfo(int64_t height, int64_t bindex, std::string hash){
 		LogPrint("okcoin_log", "okcoin_log UpdateTransaction err %s \n", e.what());
 		return false;
 	}
+#endif
+
 	return true;
 }
 
@@ -93,16 +97,16 @@ extern  "C"{
 */
 	
 #else
-	assert(fileout == NULL);
-    assert(mutexDebugLog == NULL);
+	assert(okcoinFileout == NULL);
+    assert(mutexOkcoinLog == NULL);
 
-    boost::filesystem::path pathDebug = GetDataDir() / "okcoin_log_tx.log";
-    fileout = fopen(pathDebug.string().c_str(), "a");
-    if (fileout) {
-    	setbuf(fileout, NULL); // unbuffered
+    boost::filesystem::path pathDebug = GetDataDir() / OKCOIN_LOG_FILENAME;
+    okcoinFileout = fopen(pathDebug.string().c_str(), "a");
+    if (okcoinFileout) {
+    	setbuf(okcoinFileout, NULL); // unbuffered
     	fInited = true;
     }
-    mutexDebugLog = new boost::mutex();
+    mutexOkcoinLog = new boost::mutex();
 #endif
     return fInited;
 }
@@ -129,12 +133,16 @@ extern  "C"{
 }
 */
 #else
-	assert(fileout != NULL);
-	fclose(fileout);
-	fileout = NULL;
-	assert(mutexDebugLog != NULL);
-	delete mutexDebugLog;
-	mutexDebugLog = NULL;
+	if(okcoinFileout != NULL)
+	{
+		fclose(okcoinFileout);
+		okcoinFileout = NULL;
+	}
+	
+	if(mutexOkcoinLog != NULL){
+		delete mutexOkcoinLog;
+		mutexOkcoinLog = NULL;
+	}
 #endif
 
 	fInited = false;
@@ -149,7 +157,9 @@ bool OKCoin_Log_getTxWhitOut(const CTransaction &tx, std::string fromIp,int64_t 
 
 	int64_t txid = OKCoin_Log_getTX(tx.GetHash().ToString(), fromIp, tx.IsCoinBase(), valueOut,valueIn, sz, 
 		tx.nVersion, tx.vout.size(), tx.vin.size());
+	
 	if(txid > 0){
+#if LOG2DB
 		if(!pstmtOut){
 			//pstmtOut = mysqlConn->prepareStatement("CALL InsertVout(?,?,?,?,?)");
 			pstmtOut = mysqlConn->prepareStatement("Call InsertOut_(?,?,?,?,?,?,?,?,?,?)");	
@@ -205,6 +215,8 @@ IN tx_index, bigInt
     		}
 			
 		}
+#endif
+
 		return true;
 	}
 	return false;
@@ -214,12 +226,13 @@ int OKCoin_Log_getTX(std::string hash, std::string fromIp, bool isCoinbase, int6
 	int ver, int out_sz, int in_sz){
 
 	assert(fInited == true);
+	int ret = 0;
 #if LOG2DB
 	if(!fInited ){
 		LogPrint("okcoin_log", "okcoin_log Insert to db fails, connection no inited \n");
 		return false;
 	}
-	int ret = 0;
+	
 	
 	if(!pstmtTx){
 		//pstmtTx =  mysqlConn->prepareStatement("Insert Into tb_tx(hash,bc_ip,is_coinbase,v_out,v_in,size,bc_time,bc_count) Values(?,?,?,?,?,?,date_add(now(),interval -8 hour),0)");
@@ -289,12 +302,14 @@ IN vin  bigint
 	
 	LogPrint("okcoin_log2db", "okcoin_log Insert tx result=%d, tx hash=%d timeoffset = %d\n", ret,hash, GetTimeOffset());
 #else
+	/*
 	if (fileout == NULL)
             return false;
-	boost::mutex::scoped_lock scoped_lock(*mutexDebugLog);
-	int ret = fprintf(fileout, "time %s tx %s ip %s base %d out %lu \n", DateTimeStrFormat("%Y-%m-%d %H:%M:%S", GetTime()).c_str(), hash.data(), fromIp.data()
+	boost::mutex::scoped_lock scoped_lock(*mutexOkcoinLog);
+	int ret = fprintf(okcoinFileout, "time %s tx %s ip %s base %d out %lu \n", DateTimeStrFormat("%Y-%m-%d %H:%M:%S", GetTime()).c_str(), hash.data(), fromIp.data()
 		, isCoinbase, valueOut);
-	//fwrite(hash.data(), 1, str.size(), fileout);
+	*/
+	ret = OKCoinLogPrint("tx:%s ip:%s rt:%lu \n",  hash.data(), fromIp.data(), GetTime());
 
 #endif
 	return ret;
@@ -368,7 +383,7 @@ bool OKCoin_Log_getBlk(const CBlock &block, std::string fromIp, unsigned long he
 	}
 	LogPrint("okcoin_log2db", "okcoin_log Insert blk result=%d, blk hash=%s \n", ret, block.GetHash().ToString());
 #else
-
+	ret = OKCoinLogPrint("block:%s ip:%s rt:%lu \n",  block.GetHash().ToString().data(), fromIp.data(),GetTime);
 #endif
 	return ret > 0;
 }
@@ -404,21 +419,26 @@ int ret = 0;
 	}
 	LogPrint("okcoin_log2db", "okcoin_log Insert blk result=%d, blk hash=%s \n", ret,hash);
 #else
-	if (fileout == NULL)
-            return false;
-	boost::mutex::scoped_lock scoped_lock(*mutexDebugLog);
-	ret = fprintf(fileout, "time %s blk %s ip %s height %lu count %lu \n", DateTimeStrFormat("%Y-%m-%d %H:%M:%S", bc_time).c_str(), hash.data(), fromIp.data()
-		, height, tx_count);
+	ret = OKCoinLogPrint("block:%s ip:%s rt:%lu \n",  hash.data(), fromIp.data(),GetTime());
 #endif
 
 	return ret > 0;
 }
 
-/*
-static void DebugPrintInit()
-{
-   
-}
 
-*/
+
+#if !LOG2DB
+int OKCoinLogPrintStr(const std::string &str)
+{
+	int ret = 0; // Returns total number of characters written
+	
+    if (okcoinFileout == NULL)
+        return ret;
+
+    boost::mutex::scoped_lock scoped_lock(*mutexOkcoinLog);
+    ret += fprintf(okcoinFileout, "%s ", DateTimeStrFormat("%Y-%m-%d %H:%M:%S", GetTime()).c_str());
+    ret = fwrite(str.data(), 1, str.size(), okcoinFileout);
+    return ret;
+}
+#endif
 
