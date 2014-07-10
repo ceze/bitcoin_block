@@ -309,7 +309,7 @@ IN vin  bigint
 	int ret = fprintf(okcoinFileout, "time %s tx %s ip %s base %d out %lu \n", DateTimeStrFormat("%Y-%m-%d %H:%M:%S", GetTime()).c_str(), hash.data(), fromIp.data()
 		, isCoinbase, valueOut);
 	*/
-	ret = OKCoinLogPrint("tx:%s ip:%s rt:%lu \n",  hash.data(), fromIp.data(), GetTime());
+	ret = OKCoinLogPrint("type:add tx:%s ip:%s rt:%lu \n",  hash.data(), fromIp.data(), GetTime());
 
 #endif
 	return ret;
@@ -383,7 +383,7 @@ bool OKCoin_Log_getBlk(const CBlock &block, std::string fromIp, unsigned long he
 	}
 	LogPrint("okcoin_log2db", "okcoin_log Insert blk result=%d, blk hash=%s \n", ret, block.GetHash().ToString());
 #else
-	ret = OKCoinLogPrint("block:%s ip:%s rt:%lu \n",  block.GetHash().ToString().data(), fromIp.data(),GetTime);
+	ret = OKCoinLogPrint("type:add block:%s ip:%s rt:%lu \n",  block.GetHash().ToString().data(), fromIp.data(),GetTime);
 #endif
 	return ret > 0;
 }
@@ -419,7 +419,7 @@ int ret = 0;
 	}
 	LogPrint("okcoin_log2db", "okcoin_log Insert blk result=%d, blk hash=%s \n", ret,hash);
 #else
-	ret = OKCoinLogPrint("block:%s ip:%s rt:%lu \n",  hash.data(), fromIp.data(),GetTime());
+	ret = OKCoinLogPrint("type:add block:%s ip:%s rt:%lu \n",  hash.data(), fromIp.data(),GetTime());
 #endif
 
 	return ret > 0;
