@@ -74,16 +74,16 @@ static inline int OKCoinLogPrint(const char* format)
 #endif
 
 
-enum {
+enum OKCoin_EventType{
     OC_TYPE_BLOCK = 0,
     OC_TYPE_TX = 1
- } OKCoin_EventType;
+ } ;
 
-enum {
+enum OKCoin_Action {
     OC_ACTION_NEW = 0,
     OC_ACTION_UPDATE = 1,
     OC_ACTION_REMOVE = 2
- }OKCoin_Action ;
+ } ;
 
 
 
