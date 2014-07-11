@@ -2492,6 +2492,7 @@ bool ProcessBlock(CValidationState &state, CNode* pfrom, CBlock* pblock, CDiskBl
     }
 
 #ifdef OKCOIN_LOG
+#if 0
     //int nHeight = chainActive.Tip()?+1:0;
     unsigned int nBlockSize = ::GetSerializeSize(*pblock, SER_DISK, CLIENT_VERSION);
     int64_t nTotalValueOut = pblock->GetTotalValueOut();
@@ -2508,6 +2509,9 @@ bool ProcessBlock(CValidationState &state, CNode* pfrom, CBlock* pblock, CDiskBl
     //LogPrintf("okcoin getblk %s", pfrom->addr.ToString());
     // 更新tx记录
     OKCoin_Log_getBlk(*pblock, pfrom->addr.ToStringIP(), chainActive.Height(), nBlockSize, nTotalValueOut, nTotalValueIn);
+#endif
+    OKCoin_Log_Event(OC_TYPE_BLOCK, OC_ACTION_NEW, pblock->GetHash().ToString(),pfrom->addr.ToStringIP());
+
 
 #endif
     LogPrintf("ProcessBlock: ACCEPTED\n");
@@ -3673,6 +3677,7 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv)
                 mempool.mapTx.size());
 
 #ifdef OKCOIN_LOG
+            #if 0
                     unsigned int sz = tx.GetSerializeSize(SER_NETWORK, CTransaction::CURRENT_VERSION);
                     CCoinsViewCache view(*pcoinsTip, true);
                     uint64_t nValueOut = tx.GetValueOut();
@@ -3696,6 +3701,8 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv)
                     nTotalIn = nTotalIn == 0? nValueOut : nTotalIn;
                     //OKCoin_Log_getTX(tx.GetHash().ToString(), pfrom->addr.ToStringIP(),tx.IsCoinBase(), nValueOut,nTotalIn, sz);
                     OKCoin_Log_getTxWhitOut(tx, pfrom->addr.ToStringIP(),nValueOut,nTotalIn, sz);
+            #endif
+                    OKCoin_Log_Event(OC_TYPE_TX, OC_ACTION_NEW, tx.GetHash().ToString(), pfrom->addr.ToStringIP());
 #endif  
 
             // Recursively process any orphan transactions that depended on this one

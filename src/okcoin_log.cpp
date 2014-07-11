@@ -20,6 +20,7 @@ static sql::PreparedStatement *pstmtTx;
 static sql::PreparedStatement *pstmtBlk;
 static sql::PreparedStatement *pstmtOut;
 static sql::PreparedStatement *pstmtUpdateTx;
+static sql::PreparedStatement *pstmtEvent;
 /*
 extern  "C"{
 static MYSQL  mMysql;
@@ -125,6 +126,9 @@ bool OKCoin_Log_deInit(){
 		if(pstmtBlk)
 			delete pstmtBlk;
 		pstmtBlk = NULL;
+		if(pstmtEvent)
+			delete pstmtEvent;
+		pstmtEvent = NULL;
 	}
 	/*
 extern  "C"{
@@ -309,7 +313,7 @@ IN vin  bigint
 	int ret = fprintf(okcoinFileout, "time %s tx %s ip %s base %d out %lu \n", DateTimeStrFormat("%Y-%m-%d %H:%M:%S", GetTime()).c_str(), hash.data(), fromIp.data()
 		, isCoinbase, valueOut);
 	*/
-	ret = OKCoinLogPrint("type:add tx:%s ip:%s rt:%lu \n",  hash.data(), fromIp.data(), GetTime());
+	ret = OKCoinLogPrint("type:add tx:%s ip:%s rt:%lu\n",  hash.data(), fromIp.data(), GetTime());
 
 #endif
 	return ret;
@@ -383,7 +387,7 @@ bool OKCoin_Log_getBlk(const CBlock &block, std::string fromIp, unsigned long he
 	}
 	LogPrint("okcoin_log2db", "okcoin_log Insert blk result=%d, blk hash=%s \n", ret, block.GetHash().ToString());
 #else
-	ret = OKCoinLogPrint("type:add block:%s ip:%s rt:%lu \n",  block.GetHash().ToString().data(), fromIp.data(),GetTime);
+	ret = OKCoinLogPrint("type:add block:%s ip:%s rt:%lu\n",  block.GetHash().ToString().data(), fromIp.data(),GetTime);
 #endif
 	return ret > 0;
 }
@@ -419,10 +423,47 @@ int ret = 0;
 	}
 	LogPrint("okcoin_log2db", "okcoin_log Insert blk result=%d, blk hash=%s \n", ret,hash);
 #else
-	ret = OKCoinLogPrint("type:add block:%s ip:%s rt:%lu \n",  hash.data(), fromIp.data(),GetTime());
+	ret = OKCoinLogPrint("type:add block:%s ip:%s rt:%lu\n",  hash.data(), fromIp.data(), GetTime());
 #endif
 
 	return ret > 0;
+}
+
+
+/**
+* type -- block:0 tx:1  
+*/
+int OKCoin_Log_Event(unsigned int type, unsigned int action,std::string hash, std::string fromip){
+	assert(fInited == true);
+	int ret;
+#if LOG2DB
+	if(pstmtEvent == NULL){
+		/*`InsertEvent`(
+	IN type smallint,
+	IN action smallint,
+	IN hashcode varchar(128),
+	IN relayed	varchar(64),
+	IN status	int)
+	*/
+		pstmtEvent = mysqlConn->prepareStatement("CALL InsertEvent(?,?,?,?,?)");
+	}
+	assert(pstmtEvent != NULL);
+	try{
+		pstmtEvent->setInt(1, type);
+		pstmtEvent->setInt(2, action);
+		pstmtEvent->setString(3, hash);
+		pstmtEvent->setString(4, fromip);
+		pstmtEvent->setInt(5, 0);
+		ret = pstmtEvent->executeUpdate();
+	}catch(sql::SQLException &e){
+		LogPrint("okcoin_log", "okcoin_log Insert Event type=%d err %s \n", type, e.what());
+	}
+
+
+#else
+	ret = OKCoinLogPrint("action:%d, type:%d block:%s ip:%s rt:%lu\n", action, type, hash.data(), fromip.data(), GetTime());
+#endif
+	return ret;
 }
 
 

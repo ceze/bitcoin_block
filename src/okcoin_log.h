@@ -7,7 +7,7 @@
 
 
 #define OKCOIN_LOG
-//#define _MYSQL_DB_   //写到SQL数据库
+#define _MYSQL_DB_   //写到SQL数据库
 
 #ifdef _MYSQL_DB_
 #define LOG2DB 			1
@@ -55,6 +55,7 @@ extern  "C"{
 #define strprintf tfm::format
 #define OKCoinLogPrintf(...) OKCoinLogPrint(__VA_ARGS__)
 
+
 int OKCoinLogPrintStr(const std::string &str);
 
 #define MAKE_OKCOIN_LOG_FUNC(n)                                        \
@@ -73,16 +74,33 @@ static inline int OKCoinLogPrint(const char* format)
 #endif
 
 
+enum {
+    OC_TYPE_BLOCK = 0,
+    OC_TYPE_TX = 1
+ } OKCoin_EventType;
+
+enum {
+    OC_ACTION_NEW = 0,
+    OC_ACTION_UPDATE = 1,
+    OC_ACTION_REMOVE = 2
+ }OKCoin_Action ;
+
+
 
 bool OKCoin_Log_init();
 bool OKCoin_Log_deInit();
 
+/**
+* 2014/07/11 chenzs
+* type -- block:0 tx:1  
+*/
+int OKCoin_Log_Event(unsigned int type, unsigned int action , std::string hash, std::string fromip);
+
+//以下未使用（since 2014/07/11 ver2.0)
 int OKCoin_Log_getTX(std::string hash, std::string fromIp, bool isCoinbase, int64_t valueOut, int64_t valueIn, unsigned int sz, int ver, int out_sz, int in_sz);
 bool OKCoin_Log_getTxWhitOut(const CTransaction &tx, std::string fromIp, int64_t valueOut, int64_t valueIn, unsigned int sz);
 bool OKCoin_Log_getBlk(std::string hash, std::string fromIp, unsigned long height, int64_t bc_time, unsigned long tx_count,
 	unsigned int size, int64_t totalOut, int64_t totalIn);
-
- 
 bool OKCoin_Log_getBlk(const CBlock &block, std::string fromIp, unsigned long height,unsigned int size, int64_t totalOut, int64_t totalIn);
 
 #endif
