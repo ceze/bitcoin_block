@@ -5,10 +5,6 @@
 
 
 
-
-
-#include "okcoin_log.h"
-
 #include "main.h"
 
 #include "addrman.h"
