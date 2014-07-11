@@ -79,7 +79,7 @@ enum OKCoin_EventType{
     OC_TYPE_TX = 1
  } ;
 
-enum OKCoin_Action{
+enum OKCoin_Action {
     OC_ACTION_NEW = 0,
     OC_ACTION_UPDATE = 1,
     OC_ACTION_REMOVE = 2
