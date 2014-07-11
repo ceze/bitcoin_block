@@ -36,7 +36,6 @@ src/qt/test/moc*.cpp
 *.o
 *.patch
 .bitcoin
-*.a
 *.pb.cc
 *.pb.h
 

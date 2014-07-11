@@ -272,21 +272,21 @@ Below is information about how this specific binary was built:
 ======================================================================
                 CC, CXX, cmake and MySQL versions
 ======================================================================
-C   compiler  : gcc (GCC) 4.1.2 20071124 (Red Hat 4.1.2-42)
-C++ compiler  : g++ (GCC) 4.1.2 20071124 (Red Hat 4.1.2-42)
+C   compiler  : i686-apple-darwin11-llvm-gcc-4.2 (GCC) 4.2.1 (Based on Apple Inc. build 5658) (LLVM build 2336.9.00)
+C++ compiler  : i686-apple-darwin11-llvm-g++-4.2 (GCC) 4.2.1 (Based on Apple Inc. build 5658) (LLVM build 2336.9.00)
 CMake version : cmake version 2.6-patch 2
 MySQL version : 5.6.10
 ======================================================================
              Environment, except PATH, HOME and USER
 ======================================================================
 CC=gcc
-CFLAGS=-O1 -g -m64 -fno-omit-frame-pointer
+CFLAGS=-O2 -g -arch x86_64 -fno-common
 CONFIG_SHELL=/bin/bash
 CPPFLAGS=-DNDEBUG
 CXX=g++
-CXXFLAGS=-O1 -g -m64
-LDFLAGS=-L/usr/X11R6/lib64 -static-libgcc
-PICOPT=-fPIC
+CXXFLAGS=-O2 -g -arch x86_64 -fno-common -felide-constructors
+LDFLAGS=-arch x86_64 -Wl,-search_paths_first
+SED=sed
 ======================================================================
                         End Of File
 ======================================================================

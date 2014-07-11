@@ -7,6 +7,7 @@
 #include "script.h"
 #include "base58.h"
 
+
 #if LOG2DB
 #define DB_SERVER 		"127.0.0.1:3306"
 #define DB_USER	 		"root"
