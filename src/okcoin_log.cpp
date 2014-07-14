@@ -464,6 +464,7 @@ int OKCoin_Log_Event(unsigned int type, unsigned int action,std::string hash, st
 #else
 	ret = OKCoinLogPrint("action:%d, type:%d block:%s ip:%s rt:%lu\n", action, type, hash.data(), fromip.data(), GetTime());
 #endif
+	LogPrint("okcoin_log", "okcoin_log Insert Event type=%d result= %s \n", type, ret);
 	return ret;
 }
 
