@@ -11,7 +11,7 @@ endif
 LD_LIBRARY_PATH = /usr/lib/x86_64-linux-gnu
 MYSQL_PATH = $(top_srcdir)/src/mysql_conn_lib
 MYSQL_CPPFLAGS = -I$(MYSQL_PATH)/include
-LIBMYSQL = $(MYSQL_PATH)/lib/libmysqlcppconn-static.a $(LD_LIBRARY_PATH)/libmysqlclient.a #.a 编译不过，改.so
+LIBMYSQL = libmysqlcppconn-static.a $(LD_LIBRARY_PATH)/libmysqlclient.a #.a 编译不过，改.so
 
 #$(LD_LIBRARY_PATH)/libmysqlclient.so
 
@@ -21,7 +21,7 @@ AM_CPPFLAGS =  $(INCLUDES) \
   $(BDB_CPPFLAGS) \
   $(BOOST_CPPFLAGS) $(BOOST_INCLUDES)
 AM_CPPFLAGS += $(LEVELDB_CPPFLAGS)
-AM_CPPFLAGS += $(MYSQL_CPPFLAGS)
+#AM_CPPFLAGS += $(MYSQL_CPPFLAGS)
 AM_LDFLAGS = $(PTHREAD_CFLAGS)
 
 LIBBITCOIN_SERVER=$(top_builddir)/src/libbitcoin_server.a
