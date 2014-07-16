@@ -82,7 +82,7 @@ bool OKCoin_Log_init(){
 	
 	LogPrint("okcoin_log", "OKCoin_Log_init loadconfig ok_db_host = %s\n", db_server);
 
-  	sql::Driver *driver = sql::mysql::get_driver_instance();
+  	Driver *driver = get_driver_instance();
   	mysqlConn = driver->connect(db_server,db_user, db_password);
   	fInited = mysqlConn? true: false;
   	assert(mysqlConn != NULL);
