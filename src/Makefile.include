@@ -11,7 +11,7 @@ endif
 LD_LIBRARY_PATH = /usr/lib/x86_64-linux-gnu
 MYSQL_CONN_PATH = /usr/local/lib
 MYSQL_CPPFLAGS = -I$(MYSQL_PATH)/include
-LIBMYSQL = $(MYSQL_CONN_PATH)/libmysqlcppconn-static.a $(LD_LIBRARY_PATH)/libmysqlclient.a -ldl -lz
+LIBMYSQL = $(MYSQL_CONN_PATH)/libmysqlcppconn-static.a -L$(LD_LIBRARY_PATH) -o
 
 #$(LD_LIBRARY_PATH)/libmysqlclient.so
 
