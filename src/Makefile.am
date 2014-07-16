@@ -171,8 +171,8 @@ bitcoind_LDADD = \
   libbitcoin_server.a \
   libbitcoin_cli.a \
   libbitcoin_common.a \
-  $(LIBMYSQL) \
   $(LIBLEVELDB) \
+  $(LIBMYSQL) \
   $(LIBMEMENV) 
    
 if ENABLE_WALLET
