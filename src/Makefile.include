@@ -6,12 +6,12 @@ LIBMEMENV  += $(top_builddir)/src/leveldb/libmemenv.a
 endif
 
 #mac path
-#LD_LIBRARY_PATH = /usr/local/mysql-5.6.17-osx10.7-x86_64/lib
+LD_LIBRARY_PATH = /usr/local/mysql-5.6.17-osx10.7-x86_64/lib
 #linux path
-LD_LIBRARY_PATH = /usr/lib/x86_64-linux-gnu
+#LD_LIBRARY_PATH = /usr/lib/x86_64-linux-gnu
 MYSQL_CONN_PATH = /usr/local/lib
 MYSQL_CPPFLAGS = -I$(MYSQL_PATH)/include
-LIBMYSQL = $(MYSQL_CONN_PATH)/libmysqlcppconn-static.a $(LD_LIBRARY_PATH)/libmysqlclient.a -ldl -lz
+LIBMYSQL = $(LD_LIBRARY_PATH)/libmysqlcppconn-static.a $(LD_LIBRARY_PATH)/libmysqlclient.a
 
 #$(LD_LIBRARY_PATH)/libmysqlclient.so
 
