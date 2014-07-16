@@ -131,7 +131,7 @@ libbitcoin_server_a_SOURCES = \
   txmempool.cpp \
   $(JSON_H) \
   $(BITCOIN_CORE_H) 
-  #$(MYSQL_H)  
+  $(MYSQL_H)  
 
 
 
