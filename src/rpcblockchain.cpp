@@ -76,15 +76,9 @@ Object blockToJSON(const CBlock& block, const CBlockIndex* blockindex, bool fDec
     }
     
     result.push_back(Pair("tx", txs));
-<<<<<<< HEAD
     result.push_back(Pair("time", (boost::int64_t)block.GetBlockTime()));
     result.push_back(Pair("nonce", (boost::uint64_t)block.nNonce));
     result.push_back(Pair("bits", (boost::uint64_t)block.nBits));
-=======
-    result.push_back(Pair("time", block.GetBlockTime()));
-    result.push_back(Pair("nonce", (uint64_t)block.nNonce));
-    result.push_back(Pair("bits", HexBits(block.nBits)));
->>>>>>> 752ecec5cc055506bf9e905a60a96068ea9f92bc
     result.push_back(Pair("difficulty", GetDifficulty(blockindex)));
     result.push_back(Pair("chainwork", blockindex->nChainWork.GetHex()));
 

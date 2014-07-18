@@ -64,13 +64,9 @@ void TxToJSON(const CTransaction& tx, const uint256 hashBlock, Object& entry, bo
 {
     entry.push_back(Pair("txid", tx.GetHash().GetHex()));
     entry.push_back(Pair("version", tx.nVersion));
-<<<<<<< HEAD
     int sz = tx.GetSerializeSize(SER_NETWORK, CTransaction::CURRENT_VERSION);
     entry.push_back(Pair("size",  sz));//chenzs
     entry.push_back(Pair("locktime", (boost::int64_t)tx.nLockTime));
-=======
-    entry.push_back(Pair("locktime", (int64_t)tx.nLockTime));
->>>>>>> 752ecec5cc055506bf9e905a60a96068ea9f92bc
     Array vin;
     BOOST_FOREACH(const CTxIn& txin, tx.vin)
     {
@@ -80,7 +76,6 @@ void TxToJSON(const CTransaction& tx, const uint256 hashBlock, Object& entry, bo
         else
         {
             in.push_back(Pair("txid", txin.prevout.hash.GetHex()));
-<<<<<<< HEAD
             in.push_back(Pair("vout", (boost::int64_t)txin.prevout.n));
             //chenzs 2014/07/02 get prevout info
             CTransaction txPrevOut;
@@ -100,13 +95,6 @@ void TxToJSON(const CTransaction& tx, const uint256 hashBlock, Object& entry, bo
                 o.push_back(Pair("hex", HexStr(txin.scriptSig.begin(), txin.scriptSig.end())));
                 in.push_back(Pair("scriptSig", o));
             }
-=======
-            in.push_back(Pair("vout", (int64_t)txin.prevout.n));
-            Object o;
-            o.push_back(Pair("asm", txin.scriptSig.ToString()));
-            o.push_back(Pair("hex", HexStr(txin.scriptSig.begin(), txin.scriptSig.end())));
-            in.push_back(Pair("scriptSig", o));
->>>>>>> 752ecec5cc055506bf9e905a60a96068ea9f92bc
         }
         in.push_back(Pair("sequence", (int64_t)txin.nSequence));
         vin.push_back(in);
@@ -157,14 +145,9 @@ void TxToJSON(const CTransaction& tx, const uint256 hashBlock, Object& entry, bo
             if (chainActive.Contains(pindex))
             {
                 entry.push_back(Pair("confirmations", 1 + chainActive.Height() - pindex->nHeight));
-<<<<<<< HEAD
                 entry.push_back(Pair("time", (boost::int64_t)pindex->nTime));
                 entry.push_back(Pair("blocktime", (boost::int64_t)pindex->nTime));
                 entry.push_back(Pair("blockheight", (boost::int64_t)pindex->nHeight));
-=======
-                entry.push_back(Pair("time", (int64_t)pindex->nTime));
-                entry.push_back(Pair("blocktime", (int64_t)pindex->nTime));
->>>>>>> 752ecec5cc055506bf9e905a60a96068ea9f92bc
             }
             else
                 entry.push_back(Pair("confirmations", 0));

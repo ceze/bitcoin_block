@@ -1636,11 +1636,7 @@ bool BindListenPort(const CService &addrBind, string& strError)
     {
         int nErr = WSAGetLastError();
         if (nErr == WSAEADDRINUSE)
-<<<<<<< HEAD
-            strError = strprintf(_("Unable to bind to %s on this computer. Bitcoin Core Daemon is probably already running."), addrBind.ToString());
-=======
             strError = strprintf(_("Unable to bind to %s on this computer. Bitcoin Core is probably already running."), addrBind.ToString());
->>>>>>> 752ecec5cc055506bf9e905a60a96068ea9f92bc
         else
             strError = strprintf(_("Unable to bind to %s on this computer (bind returned error %s)"), addrBind.ToString(), NetworkErrorString(nErr));
         LogPrintf("%s\n", strError);
@@ -1651,11 +1647,7 @@ bool BindListenPort(const CService &addrBind, string& strError)
     // Listen for incoming connections
     if (listen(hListenSocket, SOMAXCONN) == SOCKET_ERROR)
     {
-<<<<<<< HEAD
-        strError = strprintf(_("Error: Listening for incoming connections failed (listen returned error %d)"), WSAGetLastError());
-=======
         strError = strprintf(_("Error: Listening for incoming connections failed (listen returned error %s)"), NetworkErrorString(WSAGetLastError()));
->>>>>>> 752ecec5cc055506bf9e905a60a96068ea9f92bc
         LogPrintf("%s\n", strError);
         return false;
     }

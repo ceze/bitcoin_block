@@ -3618,17 +3618,11 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv)
             LogPrint("net", "  got inventory: %s  %s from:%s\n", inv.ToString(), fAlreadyHave ? "have" : "new", pfrom->addr.ToStringIP());
 
             if (!fAlreadyHave) {
-<<<<<<< HEAD
-                if (!fImporting && !fReindex){
-                    pfrom->AskFor(inv);
-
-=======
-                if (!fImporting && !fReindex) {
+              if (!fImporting && !fReindex) {
                     if (inv.type == MSG_BLOCK)
                         AddBlockToQueue(pfrom->GetId(), inv.hash);
                     else
                         pfrom->AskFor(inv);
->>>>>>> 752ecec5cc055506bf9e905a60a96068ea9f92bc
                 }
             } else if (inv.type == MSG_BLOCK && mapOrphanBlocks.count(inv.hash)) {
                 PushGetBlocks(pfrom, chainActive.Tip(), GetOrphanRoot(inv.hash));
