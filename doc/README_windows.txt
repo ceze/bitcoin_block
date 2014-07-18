@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 Bitcoin 0.9.1 BETA
+=======
+Bitcoin 0.9.2 BETA
+>>>>>>> 752ecec5cc055506bf9e905a60a96068ea9f92bc
 
 Copyright (c) 2009-2014 Bitcoin Core Developers
 
