@@ -446,7 +446,7 @@ int OKCoin_Log_Event(unsigned int type, unsigned int action,std::string hash, st
 	IN relayed	varchar(64),
 	IN status	int)
 	*/
-		pstmtEvent = mysqlConn->prepareStatement("CALL InsertEvent(?,?,?,?,?)");
+		pstmtEvent = mysqlConn->prepareStatement("CALL InsertEvent(?,?,?,?,?,?)");
 	}
 	assert(pstmtEvent != NULL);
 	try{
@@ -455,6 +455,7 @@ int OKCoin_Log_Event(unsigned int type, unsigned int action,std::string hash, st
 		pstmtEvent->setString(3, hash);
 		pstmtEvent->setString(4, fromip);
 		pstmtEvent->setInt(5, 0);
+		pstmtEvent->setDateTime(6,DateTimeStrFormat("%Y-%m-%d %H:%M:%S", GetTime()));
 		ret = pstmtEvent->executeUpdate();
 	}catch(sql::SQLException &e){
 		LogPrint("okcoin_log", "okcoin_log Insert Event type=%d err %s \n", type, e.what());
