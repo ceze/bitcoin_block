@@ -67,15 +67,16 @@ Object blockToJSON(const CBlock& block, const CBlockIndex* blockindex, bool fDec
     BOOST_FOREACH(const CTransaction&tx, block.vtx){
         //chenzs 2014/07/05
         if(!fDecode){
-            txs.push_back(tx.GetHash().GetHex());    
+            txs.push_back(tx.GetHash().GetHex());   
+            result.push_back(Pair("txid", txs)); 
         }else{
             Object oTx;
             TxToJSON(tx, block.GetHash(), oTx,false);
             txs.push_back(oTx);
+            result.push_back(Pair("tx", txs));
         }
     }
     
-    result.push_back(Pair("tx", txs));
     result.push_back(Pair("time", (boost::int64_t)block.GetBlockTime()));
     result.push_back(Pair("nonce", (boost::uint64_t)block.nNonce));
     result.push_back(Pair("bits", (boost::uint64_t)block.nBits));
@@ -280,7 +281,7 @@ Value getblock(const Array& params, bool fHelp)
     std::string strHash = params[0].get_str();
     uint256 hash(strHash);
 
-    bool fVerbose = true;
+    bool fVerbose = true; //解码Block
     if (params.size() > 1)
         fVerbose = params[1].get_bool();
 
@@ -299,7 +300,7 @@ Value getblock(const Array& params, bool fHelp)
         return strHex;
     }
 
-    bool fDecode = true;
+    bool fDecode = true; //解码Transaction
     if(params.size() > 2)
         fDecode = params[2].get_bool();
 
