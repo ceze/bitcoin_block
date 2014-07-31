@@ -76,7 +76,7 @@ Value getpeerinfo(const Array& params, bool fHelp)
             "getpeerinfo\n"
             "\nReturns data about each connected network node as a json array of objects.\n"
             "\nbResult:\n"
-            "[\n"
+            "pinfo:[\n"
             "  {\n"
             "    \"addr\":\"host:port\",      (string) The ip address and port of the peer\n"
             "    \"addrlocal\":\"ip:port\",   (string) local address\n"
@@ -106,7 +106,8 @@ Value getpeerinfo(const Array& params, bool fHelp)
     vector<CNodeStats> vstats;
     CopyNodeStats(vstats);
 
-    Array ret;
+    Object result;
+    Array arr;
 
     BOOST_FOREACH(const CNodeStats& stats, vstats) {
         Object obj;
@@ -136,10 +137,12 @@ Value getpeerinfo(const Array& params, bool fHelp)
         }
         obj.push_back(Pair("syncnode", stats.fSyncNode));
 
-        ret.push_back(obj);
+        arr.push_back(obj);
     }
 
-    return ret;
+    result.push_back(Pair("infos", arr));
+
+    return result;
 }
 
 Value addnode(const Array& params, bool fHelp)
