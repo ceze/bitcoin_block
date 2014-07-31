@@ -68,14 +68,17 @@ Object blockToJSON(const CBlock& block, const CBlockIndex* blockindex, bool fDec
         //chenzs 2014/07/05
         if(!fDecode){
             txs.push_back(tx.GetHash().GetHex());   
-            result.push_back(Pair("txid", txs)); 
         }else{
             Object oTx;
             TxToJSON(tx, block.GetHash(), oTx,false);
             txs.push_back(oTx);
-            result.push_back(Pair("tx", txs));
         }
     }
+    
+    if(fDecode)
+        result.push_back(Pair("txid", txs)); 
+    else
+        result.push_back(Pair("tx", txs)); 
     
     result.push_back(Pair("time", (boost::int64_t)block.GetBlockTime()));
     result.push_back(Pair("nonce", (boost::uint64_t)block.nNonce));
