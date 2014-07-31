@@ -74,12 +74,11 @@ Object blockToJSON(const CBlock& block, const CBlockIndex* blockindex, bool fDec
             txs.push_back(oTx);
         }
     }
-    
     if(fDecode)
-        result.push_back(Pair("txid", txs)); 
-    else
         result.push_back(Pair("tx", txs)); 
-    
+    else
+        result.push_back(Pair("txid", txs)); 
+
     result.push_back(Pair("time", (boost::int64_t)block.GetBlockTime()));
     result.push_back(Pair("nonce", (boost::uint64_t)block.nNonce));
     result.push_back(Pair("bits", (boost::uint64_t)block.nBits));
@@ -303,7 +302,7 @@ Value getblock(const Array& params, bool fHelp)
         return strHex;
     }
 
-    bool fDecode = true; //解码Transaction
+    bool fDecode = false; //解码Transaction
     if(params.size() > 2)
         fDecode = params[2].get_bool();
 
