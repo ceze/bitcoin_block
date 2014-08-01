@@ -162,6 +162,9 @@ Array RPCConvertValues(const std::string &strMethod, const std::vector<std::stri
     if (strMethod == "listunspent"            && n > 2) ConvertTo<Array>(params[2]);
     if (strMethod == "getblock"               && n > 1) ConvertTo<bool>(params[1]);
     if (strMethod == "getblock"               && n > 2) ConvertTo<bool>(params[2]);
+    if (strMethod == "getblockbyheight"       && n > 0) ConvertTo<int64_t>(params[0]);
+    if (strMethod == "getblockbyheight"       && n > 1) ConvertTo<bool>(params[1]);
+    if (strMethod == "getblockbyheight"       && n > 2) ConvertTo<bool>(params[2]);
     if (strMethod == "getrawtransaction"      && n > 1) ConvertTo<int64_t>(params[1]);
     if (strMethod == "createrawtransaction"   && n > 0) ConvertTo<Array>(params[0]);
     if (strMethod == "createrawtransaction"   && n > 1) ConvertTo<Object>(params[1]);

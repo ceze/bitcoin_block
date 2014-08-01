@@ -243,6 +243,35 @@ Value getblockhash(const Array& params, bool fHelp)
     return pblockindex->GetBlockHash().GetHex();
 }
 
+Value getblockbyheight(const Array& params, bool fHelp){
+    if(fHelp || params.size() < 1 || params.size() > 3){
+        throw runtime_error(
+            "getblockbyheight \"height\" ( verbose ) ( decode )\n"
+            "\nref to getblock()\n"
+            + HelpExampleCli("getblockbyheight", "1000")
+            + HelpExampleRpc("getblockbyheight", "1000")
+        );
+    }
+
+    int nHeight = params[0].get_int();
+    if (nHeight < 0 || nHeight > chainActive.Height())
+        throw runtime_error("Block number out of range.");
+
+    CBlockIndex* pblockindex = chainActive[nHeight];
+    CBlock block;
+    ReadBlockFromDisk(block, pblockindex);
+
+    bool fVerbose = true; //解码Block
+        if (params.size() > 1)
+            fVerbose = params[1].get_bool();
+    bool fDecode = false; //解码Transaction
+    if(params.size() > 2)
+        fDecode = params[2].get_bool();
+
+    return blockToJSON(block, pblockindex, fDecode);
+
+}
+
 Value getblock(const Array& params, bool fHelp)
 {
     if (fHelp || params.size() < 1 || params.size() > 3)
