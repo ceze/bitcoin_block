@@ -237,7 +237,7 @@ Value getrawtransaction(const Array& params, bool fHelp)
         return strHex;
 
     Object result;
-    result.push_back(Pair("hex", strHex));
+    //result.push_back(Pair("hex", strHex));//chenzs不返回hex
     TxToJSON(tx, hashBlock, result, true);
     return result;
 }
