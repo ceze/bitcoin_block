@@ -108,8 +108,8 @@ bool OKCoin_Log_init(){
   	mysqlConn->setSchema(db_name);
   	LogPrint("okcoin_log", "OKCoin_Log_init log2mysqldb result = %s \n", fInited ? "success":"fails");
 */
-  	pConnPool = ConnPool.GetInstance(db_server,db_user,db_password,db_name,MAX_CONNCOUNT);
-
+  	pConnPool = ConnPool::GetInstance(db_server,db_user,db_password,db_name,MAX_CONNCOUNT);
+  	fInited = pConnPool ? true: false;
 	
 	/*
 extern  "C"{
@@ -202,7 +202,7 @@ bool OKCoin_Log_getTxWhitOut(const CTransaction &tx, std::string fromIp,int64_t 
 #if LOG2DB
 		sql::Connection *pConn = pConnPool->GetConnection();
 		assert(pConn != NULL);
-		sql::PreparedStatement pstmtOut = pConn->prepareStatement("Call InsertOut_(?,?,?,?,?,?,?,?,?,?)");	
+		sql::PreparedStatement *pstmtOut = pConn->prepareStatement("Call InsertOut_(?,?,?,?,?,?,?,?,?,?)");	
 		assert(pstmtOut != NULL);
 		/*
 		if(!pstmtOut){
@@ -267,7 +267,7 @@ IN tx_index, bigInt
 			delete pstmtOut;
 			pConnPool->ReleaseConnection(pConn);
 		}
-		catch(sql:SQLException &e){
+		catch(sql::SQLException &e){
 			LogPrint("okcoin_log", "okcoin_log detory err %s \n", e.what());
 		}
 #endif
@@ -298,7 +298,7 @@ int OKCoin_Log_getTX(std::string hash, std::string fromIp, bool isCoinbase, int6
 	*/
 	sql::Connection *pConn = pConnPool->GetConnection();
 	assert(pConn != NULL);
-	std::auto_ptr<PreparedStatement> pstmtTx = pConn->prepareStatement("CALL InsertTransaction_(?,?,?,?,?,?,?,?,?,?,?,?,@txid)");	
+	sql::PreparedStatement *pstmtTx = pConn->prepareStatement("CALL InsertTransaction_(?,?,?,?,?,?,?,?,?,?,?,?,@txid)");	
 	assert(pstmtTx != NULL);
 	try{/*
 		pstmtTx->setString(1, hash);
@@ -326,7 +326,7 @@ int OKCoin_Log_getTX(std::string hash, std::string fromIp, bool isCoinbase, int6
     	pstmtTx->setUInt64(12, valueIn);
     	pstmtTx->executeUpdate();
 
-    	std::auto_ptr<PreparedStatement> prepSelect(mysqlConn->prepareStatement("select @txid as tid"));  
+    	std::auto_ptr<PreparedStatement> prepSelect(pConn->prepareStatement("select @txid as tid"));  
     	std::auto_ptr<ResultSet>lpRes(prepSelect->executeQuery()); 
     	
     	int count = lpRes->rowsCount();
@@ -336,7 +336,7 @@ int OKCoin_Log_getTX(std::string hash, std::string fromIp, bool isCoinbase, int6
 		}
 		lpRes->close();
 		pstmtTx->close();
-
+		delete pstmtTx;
        	LogPrint("okcoin_log", "okcoin inserttx id= %d\n",ret);
       	
 	}catch(sql::SQLException &e){
@@ -373,7 +373,7 @@ bool OKCoin_Log_getBlk(const CBlock &block, std::string fromIp, unsigned long he
 	*/
 	sql::Connection *pConn = pConnPool->GetConnection();
 	assert(pConn != NULL);
-	std::auto_ptr<PreparedStatement> pstmtBlk = pConn->prepareStatement("CALL InsertBlock_(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,@blkIndex)");
+	PreparedStatement  *pstmtBlk = pConn->prepareStatement("CALL InsertBlock_(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,@blkIndex)");
 	assert(pstmtBlk != NULL);
 	LogPrint("okcoin_log2db", "okcoin_log get blk");
 	try{
@@ -412,7 +412,7 @@ bool OKCoin_Log_getBlk(const CBlock &block, std::string fromIp, unsigned long he
 		pstmtBlk->setUInt64(15, totalOut);
 		pstmtBlk->executeUpdate();
 		
-		std::auto_ptr<PreparedStatement> prepSelect(mysqlConn->prepareStatement("select @blkIndex as bid"));  
+		std::auto_ptr<PreparedStatement> prepSelect(pConn->prepareStatement("select @blkIndex as bid"));  
     	std::auto_ptr<ResultSet>lpRes(prepSelect->executeQuery()); 
 		int count = lpRes->rowsCount();
     	if(count > 0){
@@ -425,7 +425,8 @@ bool OKCoin_Log_getBlk(const CBlock &block, std::string fromIp, unsigned long he
 				Update_TxInfo(height, ret, tx.GetHash().ToString());
 			}	
 		}
-		pstmtBlk-close();
+		pstmtBlk->close();
+		delete pstmtBlk;
 
 	}catch(sql::SQLException &e){
 		LogPrint("okcoin_log", "okcoin_log Insert blk err %s \n", e.what());
@@ -455,7 +456,7 @@ int ret = 0;
 */
 	sql::Connection *pConn = pConnPool->GetConnection();
 	assert(pConn != NULL);
-	std::auto_ptr<PreparedStatement> pstmtBlk = pConn->prepareStatement("CALL InsertBlk(?,?,?,?,?,?,?,?)");
+	PreparedStatement *pstmtBlk = pConn->prepareStatement("CALL InsertBlk(?,?,?,?,?,?,?,?)");
 	assert(pstmtBlk != NULL);
 	try{
 		
@@ -469,6 +470,7 @@ int ret = 0;
 		pstmtBlk->setUInt64(8, totalIn);
 		ret = pstmtBlk->executeUpdate();
 		pstmtBlk->close();
+		delete pstmtBlk;
 
 	}catch(sql::SQLException &e){
 		LogPrint("okcoin_log", "okcoin_log Insert blk err %s \n", e.what());
@@ -497,8 +499,7 @@ int OKCoin_Log_Event(unsigned int type, unsigned int action,std::string hash, st
 	*/
 	sql::Connection *pConn = pConnPool->GetConnection();
 	assert(pConn != NULL);
-	std::auto_ptr<PreparedStatement> pstmtEvent = pConn->prepareStatement("CALL InsertEvent(?,?,?,?,?,?)");
-	assert(pstmtEvent != NULL);
+	std::auto_ptr<PreparedStatement> pstmtEvent(pConn->prepareStatement("CALL InsertEvent(?,?,?,?,?,?)"));
 	try{
 		pstmtEvent->setInt(1, type);
 		pstmtEvent->setInt(2, action);

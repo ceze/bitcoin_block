@@ -5,34 +5,29 @@
 
 #include <stdexcept>
 #include "mysql_connpool.h"
-#include "config.h"
             
 using namespace std;
-extern Config *config;
 
 ConnPool * ConnPool::connPool = NULL;
 
-ConnPool::ConnPool(string host,string user,string password,int maxSize){
+ConnPool::ConnPool(string host,string user,string password,string dbname, int maxSize){
     connectionProperties["hostName"] = host;
     connectionProperties["userName"] = user;
     connectionProperties["password"] = password;
     connectionProperties["OPT_CONNECT_TIMEOUT"] = 600;
     connectionProperties["OPT_RECONNECT"] = true;
+
+    db_name = dbname;
     
     this->maxSize = maxSize;
-    this->lock = new Mutex();
     this->curSize = 0;
     //初始化driver
     try{
         this->driver = sql::mysql::get_driver_instance();  //这里不是线程安全的
     }
     catch(sql::SQLException &e){
-        string errorMsg = string("SQLException: ") + e.what() + string(" MySQL error code: ") + int_to_string(e.getErrorCode()) + string(" SQLState ") +  e.getSQLState();
-        Log::Write(__FILE__,__FUNCTION__,__LINE__,errorMsg);
     }
     catch(std::runtime_error &e){
-        string errorMsg = string("runtime_error: ") + e.what(); 
-        Log::Write(__FILE__,__FUNCTION__,__LINE__,errorMsg);
     }
     //初始化连接池
     this->Init(maxSize/2);
@@ -40,12 +35,11 @@ ConnPool::ConnPool(string host,string user,string password,int maxSize){
 
 ConnPool::~ConnPool(){    
     this->Destroy();
-    delete lock;
 }
 
-ConnPool *ConnPool::GetInstance(string host,string user,string password,int maxSize){
+ConnPool *ConnPool::GetInstance(string host,string user,string password,string dbname, int maxSize){
     if(connPool == NULL) {
-        connPool = new ConnPool(host,user,password, maxSize);
+        connPool = new ConnPool(host,user,password,dbname, maxSize);
     }
     
     return connPool;
@@ -53,7 +47,7 @@ ConnPool *ConnPool::GetInstance(string host,string user,string password,int maxS
 
 void ConnPool::Init(int size){
     sql::Connection * conn ;
-    lock->Lock();
+    pthread_mutex_lock(&lock); 
     
     for(int i = 0; i < size ;){
         conn = this->CreateConnection();
@@ -63,17 +57,16 @@ void ConnPool::Init(int size){
             ++curSize;
         }
         else{
-            Log::Write(__FILE__,__FUNCTION__,__LINE__,"Init connpooo fail one");
         }
     }
     
-    lock->UnLock();    
+     pthread_mutex_unlock(&lock);    
 }
 
 void ConnPool::Destroy(){
-    deque<sql::Connection *>::iterator pos;
+    list<sql::Connection *>::iterator pos;
     
-    lock->Lock();
+      pthread_mutex_lock(&lock);  
     
     for(pos = conns.begin(); pos != conns.end();++pos){
         this->TerminateConnection(*pos);
@@ -81,8 +74,7 @@ void ConnPool::Destroy(){
     
     curSize = 0;
     conns.clear();
-    
-    lock->UnLock();    
+    pthread_mutex_unlock(&lock);    
 }
 
 sql::Connection * ConnPool::CreateConnection(){//这里不负责curSize的增加
@@ -90,17 +82,13 @@ sql::Connection * ConnPool::CreateConnection(){//这里不负责curSize的增加
     
     try{
         conn = driver->connect(connectionProperties);
-        Log::Write(__FILE__,__FUNCTION__,__LINE__,"create a mysql conn");
-        return conn;
+        conn->setSchema(db_name);
+         return conn;
     }
     catch(sql::SQLException &e){
-        string errorMsg = string("SQLException:") + e.what() + string(" MySQL error code: ") + int_to_string(e.getErrorCode()) + string(" SQLState ") +  e.getSQLState();
-        Log::Write(__FILE__,__FUNCTION__,__LINE__,errorMsg);
         return NULL;
     }
     catch(std::runtime_error &e){
-        string errorMsg = string("runtime_error: ") + e.what(); 
-        Log::Write(__FILE__,__FUNCTION__,__LINE__,errorMsg);
         return NULL;
     }
 }
@@ -111,12 +99,8 @@ void ConnPool::TerminateConnection(sql::Connection * conn){
             conn->close();
         }
         catch(sql::SQLException &e){
-            string errorMsg = string("SQLException:") + e.what() + string(" MySQL error code: ") + int_to_string(e.getErrorCode()) + string(" SQLState ") +  e.getSQLState();
-            Log::Write(__FILE__,__FUNCTION__,__LINE__,errorMsg);
         }
         catch(std::runtime_error &e){
-            string errorMsg = string("runtime_error: ") + e.what(); 
-            Log::Write(__FILE__,__FUNCTION__,__LINE__,errorMsg);
         }
         
         delete conn;
@@ -126,14 +110,12 @@ void ConnPool::TerminateConnection(sql::Connection * conn){
 sql::Connection * ConnPool::GetConnection(){
     sql::Connection * conn;
     
-    lock->Lock();
-    
+     pthread_mutex_lock(&lock);   
     if(conns.size() > 0){//有空闲连接,则返回
         conn = conns.front();
         conns.pop_front();
         
         if(conn->isClosed()){ //如果连接关闭,则重新打开一个连接
-            Log::Write(__FILE__,__FUNCTION__,__LINE__,"a mysql conn has been closed");
             delete conn;
             conn = this->CreateConnection();
         }
@@ -141,8 +123,7 @@ sql::Connection * ConnPool::GetConnection(){
         if(conn == NULL){ //创建连接不成功
             --curSize;
         }
-        lock->UnLock();
-        
+        pthread_mutex_unlock(&lock);  
         return conn;
     }
     else{
@@ -150,16 +131,16 @@ sql::Connection * ConnPool::GetConnection(){
             conn = this->CreateConnection();
             if(conn){
                 ++curSize;
-                lock->UnLock();
+                  pthread_mutex_unlock(&lock);  
                 return conn;
             }
             else{
-                lock->UnLock();
+                 pthread_mutex_unlock(&lock);  
                 return NULL;
             }
         }
         else{//连接池已经满了
-            lock->UnLock();
+              pthread_mutex_unlock(&lock);  
             return NULL;
         }
     }    
@@ -167,11 +148,11 @@ sql::Connection * ConnPool::GetConnection(){
 
 void ConnPool::ReleaseConnection(sql::Connection * conn){
     if(conn){
-        lock->Lock();
+        pthread_mutex_lock(&lock);  
         
         conns.push_back(conn);
         
-        lock->UnLock();
+         pthread_mutex_unlock(&lock);  
     }
 }
 

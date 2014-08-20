@@ -42,6 +42,7 @@ BITCOIN_CORE_H = \
   db.h \
   hash.h \
   init.h \
+  mysql_connpool.h \
   okcoin_log. h \
   key.h \
   keystore.h \
@@ -113,6 +114,7 @@ libbitcoin_server_a_SOURCES = \
   checkpoints.cpp \
   coins.cpp \
   init.cpp \
+  mysql_connpool.cpp \
   okcoin_log.cpp \
   keystore.cpp \
   leveldbwrapper.cpp \
