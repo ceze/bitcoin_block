@@ -26,6 +26,7 @@ using namespace boost;
 using namespace boost::assign;
 using namespace json_spirit;
 
+//chenzs okcoin
 void ScriptPubKeyToJSON(const CScript& scriptPubKey, Object& out, bool fIncludeHex)
 {
     txnouttype type;
@@ -51,6 +52,7 @@ void ScriptPubKeyToJSON(const CScript& scriptPubKey, Object& out, bool fIncludeH
     out.push_back(Pair("addresses", a));
 }
 
+//chenzs okcoin
 void TxoutToJSON(const CTxOut& txout, Object& out, unsigned int i, bool fInfo){
     //out.push_back(Pair("value", ValueFromAmount(txout.nValue)));
     out.push_back(Pair("value", txout.nValue));
@@ -59,7 +61,7 @@ void TxoutToJSON(const CTxOut& txout, Object& out, unsigned int i, bool fInfo){
     ScriptPubKeyToJSON(txout.scriptPubKey, o, fInfo);
     out.push_back(Pair("scriptPubKey", o));
 }
-
+//chenzs okcoin
 void TxToJSON(const CTransaction& tx, const uint256 hashBlock, Object& entry, bool fInfo)
 {
     entry.push_back(Pair("txid", tx.GetHash().GetHex()));
@@ -237,6 +239,7 @@ Value getrawtransaction(const Array& params, bool fHelp)
         return strHex;
 
     Object result;
+    //chenzs okcoin
     //result.push_back(Pair("hex", strHex));//chenzs不返回hex
     TxToJSON(tx, hashBlock, result, true);
     return result;

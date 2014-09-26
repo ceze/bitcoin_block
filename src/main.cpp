@@ -6,6 +6,7 @@
 
 
 #include "main.h"
+//okcoin
 #include "okcoin_log.h"
 #include "addrman.h"
 #include "alert.h"

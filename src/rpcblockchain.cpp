@@ -15,6 +15,7 @@
 using namespace json_spirit;
 using namespace std;
 
+//chenzs okcoin
 void ScriptPubKeyToJSON(const CScript& scriptPubKey, Object& out, bool fIncludeHex);
 void TxToJSON(const CTransaction& tx, const uint256 hashBlock, Object& entry, bool fInfo);
 
@@ -49,7 +50,7 @@ double GetDifficulty(const CBlockIndex* blockindex)
     return dDiff;
 }
 
-
+//chenzs okcoin
 Object blockToJSON(const CBlock& block, const CBlockIndex* blockindex, bool fDecode)
 {
     Object result;
@@ -262,8 +263,8 @@ Value getblockbyheight(const Array& params, bool fHelp){
     ReadBlockFromDisk(block, pblockindex);
 
     bool fVerbose = true; //解码Block
-        if (params.size() > 1)
-            fVerbose = params[1].get_bool();
+    if (params.size() > 1)
+        fVerbose = params[1].get_bool();
     bool fDecode = false; //解码Transaction
     if(params.size() > 2)
         fDecode = params[2].get_bool();
@@ -445,7 +446,7 @@ Value gettxout(const Array& params, bool fHelp)
         ret.push_back(Pair("confirmations", pindex->nHeight - coins.nHeight + 1));
     ret.push_back(Pair("value", ValueFromAmount(coins.vout[n].nValue)));
     Object o;
-    ScriptPubKeyToJSON(coins.vout[n].scriptPubKey, o, true);
+    ScriptPubKeyToJSON(coins.vout[n].scriptPubKey, o, true);//chenzs okcoin
     ret.push_back(Pair("scriptPubKey", o));
     ret.push_back(Pair("version", coins.nVersion));
     ret.push_back(Pair("coinbase", coins.fCoinBase));

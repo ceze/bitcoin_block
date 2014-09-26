@@ -10,7 +10,7 @@
 
 
 #include "init.h"
-
+//okcoin
 #include "okcoin_log.h"
 
 #include "addrman.h"
