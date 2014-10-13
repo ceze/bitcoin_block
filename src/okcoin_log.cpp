@@ -538,3 +538,11 @@ int OKCoinLogPrintStr(const std::string &str)
 }
 #endif
 
+bool OKCoin_Log_EarseOrphaneBlk(std::string blkHash){
+	OKCoin_Log_Event(OC_TYPE_BLOCK, OC_ACTION_REMOVE,  blkHash, "127.0.0.1");
+}
+
+bool OKCoin_Log_EarseOrphaneTx(std::string txHash){
+	OKCoin_Log_Event(OC_TYPE_TX, OC_ACTION_REMOVE,  txHash, "127.0.0.1");
+}
+

@@ -96,6 +96,9 @@ bool OKCoin_Log_deInit();
 * type -- block:0 tx:1  
 */
 int OKCoin_Log_Event(unsigned int type, unsigned int action , std::string hash, std::string fromip);
+//剔除孤立数据
+bool OKCoin_Log_EarseOrphaneBlk(std::string blkHash);
+bool OKCoin_Log_EarseOrphaneTx(std::string txHash);
 
 //以下未使用（since 2014/07/11 ver2.0)
 int OKCoin_Log_getTX(std::string hash, std::string fromIp, bool isCoinbase, int64_t valueOut, int64_t valueIn, unsigned int sz, int ver, int out_sz, int in_sz);
@@ -103,5 +106,6 @@ bool OKCoin_Log_getTxWhitOut(const CTransaction &tx, std::string fromIp, int64_t
 bool OKCoin_Log_getBlk(std::string hash, std::string fromIp, unsigned long height, int64_t bc_time, unsigned long tx_count,
 	unsigned int size, int64_t totalOut, int64_t totalIn);
 bool OKCoin_Log_getBlk(const CBlock &block, std::string fromIp, unsigned long height,unsigned int size, int64_t totalOut, int64_t totalIn);
+
 
 #endif

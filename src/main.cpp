@@ -450,6 +450,8 @@ void static EraseOrphanTx(uint256 hash)
             mapOrphanTransactionsByPrev.erase(txin.prevout.hash);
     }
     mapOrphanTransactions.erase(hash);
+    //OKCoin 
+    OKCoin_Log_EarseOrphaneTx(hash.ToString());
 }
 
 unsigned int LimitOrphanTxSize(unsigned int nMaxOrphans)
@@ -1179,6 +1181,8 @@ void static PruneOrphanBlocks()
     delete it->second;
     mapOrphanBlocksByPrev.erase(it);
     mapOrphanBlocks.erase(hash);
+    //OKCoin_Log
+    OKCoin_Log_EarseOrphaneBlk(hash.ToString());
 }
 
 int64_t GetBlockValue(int nHeight, int64_t nFees)
