@@ -451,7 +451,10 @@ void static EraseOrphanTx(uint256 hash)
     }
     mapOrphanTransactions.erase(hash);
     //OKCoin 
+    
+#ifdef OKCOIN_LOG
     OKCoin_Log_EarseOrphaneTx(hash.ToString());
+#endif
 }
 
 unsigned int LimitOrphanTxSize(unsigned int nMaxOrphans)
@@ -1181,8 +1184,10 @@ void static PruneOrphanBlocks()
     delete it->second;
     mapOrphanBlocksByPrev.erase(it);
     mapOrphanBlocks.erase(hash);
-    //OKCoin_Log
-    OKCoin_Log_EarseOrphaneBlk(hash.ToString());
+#ifdef OKCOIN_LOG
+     OKCoin_Log_EarseOrphaneBlk(hash.ToString());
+#endif
+   
 }
 
 int64_t GetBlockValue(int nHeight, int64_t nFees)
@@ -2580,6 +2585,10 @@ bool ProcessBlock(CValidationState &state, CNode* pfrom, CBlock* pblock, CDiskBl
             if (AcceptBlock(block, stateDummy))
                 vWorkQueue.push_back(mi->second->hashBlock);
             mapOrphanBlocks.erase(mi->second->hashBlock);
+ 
+#ifdef OKCOIN_LOG
+            OKCoin_Log_EarseOrphaneBlk(mi->second->hashBlock.ToString());
+#endif
             delete mi->second;
         }
         mapOrphanBlocksByPrev.erase(hashPrev);
