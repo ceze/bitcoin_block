@@ -1691,6 +1691,9 @@ bool DisconnectBlock(CBlock& block, CValidationState& state, CBlockIndex* pindex
     view.SetBestBlock(pindex->pprev->GetBlockHash());
 
     if (pfClean) {
+#ifdef OKCOIN_LOG
+         OKCoin_Log_EarseOrphaneBlk(mi->second->hashBlock.ToString());
+#endif
         *pfClean = fClean;
         return true;
     } else {
@@ -2585,37 +2588,12 @@ bool ProcessBlock(CValidationState &state, CNode* pfrom, CBlock* pblock, CDiskBl
             if (AcceptBlock(block, stateDummy))
                 vWorkQueue.push_back(mi->second->hashBlock);
             mapOrphanBlocks.erase(mi->second->hashBlock);
- 
-#ifdef OKCOIN_LOG
-            OKCoin_Log_EarseOrphaneBlk(mi->second->hashBlock.ToString());
-#endif
             delete mi->second;
         }
         mapOrphanBlocksByPrev.erase(hashPrev);
     }
-
 #ifdef OKCOIN_LOG
-#if 0
-    //int nHeight = chainActive.Tip()?+1:0;
-    unsigned int nBlockSize = ::GetSerializeSize(*pblock, SER_DISK, CLIENT_VERSION);
-    int64_t nTotalValueOut = pblock->GetTotalValueOut();
-    int64_t nTotalValueIn = 0;
-    BOOST_FOREACH(const CTransaction& tx, pblock->vtx)
-    {
-        CCoinsViewCache view(*pcoinsTip, true);
-        if(view.HaveInputs(tx)){
-            nTotalValueIn += view.GetValueIn(tx);
-        }
-    }
-   // nTotalValueIn = nTotalValueIn == 0 ? nTotalValueOut : nTotalValueIn;
-   // OKCoin_Log_getBlk(pblock->GetHash().ToString(),pfrom->addr.ToStringIP(), chainActive.Height(),pblock->GetBlockTime(),chainActive.Tip()->nTx,nBlockSize,nTotalValueOut , nTotalValueIn);
-    //LogPrintf("okcoin getblk %s", pfrom->addr.ToString());
-    // 更新tx记录
-    OKCoin_Log_getBlk(*pblock, pfrom->addr.ToStringIP(), chainActive.Height(), nBlockSize, nTotalValueOut, nTotalValueIn);
-#endif
     OKCoin_Log_Event(OC_TYPE_BLOCK, OC_ACTION_NEW, pblock->GetHash().ToString(),pfrom->addr.ToStringIP());
-
-
 #endif
     LogPrintf("ProcessBlock: ACCEPTED\n");
     return true;

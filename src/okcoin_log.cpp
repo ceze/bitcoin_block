@@ -16,7 +16,7 @@
 #define DB_USER	 		"root"
 #define DB_PASSWORD		"root"
 #define DB_NAME			"blockchain"
-#define MAX_CONNCOUNT	8
+#define MAX_CONNCOUNT	10
 
 
 using namespace sql;
