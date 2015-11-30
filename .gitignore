@@ -85,3 +85,8 @@ qa/pull-tester/build-tests.sh
 libbitcoin_cli.a
 libbitcoin_common.a
 libbitcoin_server.a
+bitcoin_block.config
+bitcoin_block.creator
+bitcoin_block.creator.user
+bitcoin_block.files
+bitcoin_block.includes
