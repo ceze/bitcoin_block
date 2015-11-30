@@ -450,11 +450,6 @@ void static EraseOrphanTx(uint256 hash)
             mapOrphanTransactionsByPrev.erase(txin.prevout.hash);
     }
     mapOrphanTransactions.erase(hash);
-    //OKCoin 
-    
-#ifdef OKCOIN_LOG
-    OKCoin_Log_EarseOrphaneTx(hash.ToString());
-#endif
 }
 
 unsigned int LimitOrphanTxSize(unsigned int nMaxOrphans)
@@ -3747,32 +3742,7 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv)
                 mempool.mapTx.size());
 
 #ifdef OKCOIN_LOG
-            #if 0
-                    unsigned int sz = tx.GetSerializeSize(SER_NETWORK, CTransaction::CURRENT_VERSION);
-                    CCoinsViewCache view(*pcoinsTip, true);
-                    uint64_t nValueOut = tx.GetValueOut();
-                    uint64_t  nTotalIn = 0;
-                    
-                    BOOST_FOREACH(const CTxIn& txin, tx.vin)
-                    {
-                         if (view.HaveCoins(txin.prevout.hash))
-                         {   
-                             const CCoins &coins = view.GetCoins(txin.prevout.hash);
-
-                              int64_t nValueIn = coins.vout[txin.prevout.n].nValue;
-                             nTotalIn += nValueIn;
-                         }
-                     }
-                     /*
-                     if(view.HaveInputs(tx)){
-                        nTotalIn = view.GetValueIn(tx);
-                     }
-                     */
-                    nTotalIn = nTotalIn == 0? nValueOut : nTotalIn;
-                    //OKCoin_Log_getTX(tx.GetHash().ToString(), pfrom->addr.ToStringIP(),tx.IsCoinBase(), nValueOut,nTotalIn, sz);
-                    OKCoin_Log_getTxWhitOut(tx, pfrom->addr.ToStringIP(),nValueOut,nTotalIn, sz);
-            #endif
-                    OKCoin_Log_Event(OC_TYPE_TX, OC_ACTION_NEW, tx.GetHash().ToString(), pfrom->addr.ToStringIP());
+           OKCoin_Log_Event(OC_TYPE_TX, OC_ACTION_NEW, tx.GetHash().ToString(), pfrom->addr.ToStringIP());
 #endif  
 
             // Recursively process any orphan transactions that depended on this one
@@ -3798,6 +3768,9 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv)
                         mapAlreadyAskedFor.erase(CInv(MSG_TX, orphanHash));
                         vWorkQueue.push_back(orphanHash);
                         vEraseQueue.push_back(orphanHash);
+#ifdef OKCOIN_LOG
+                        OKCoin_Log_Event(OC_TYPE_TX, OC_ACTION_NEW, orphanHash.ToString(), pfrom->addr.ToStringIP());
+#endif
                     }
                     else if (!fMissingInputs2)
                     {

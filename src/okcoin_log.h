@@ -76,14 +76,14 @@ static inline int OKCoinLogPrint(const char* format)
 
 
 enum OKCoin_EventType{
-    OC_TYPE_BLOCK = 0,
-    OC_TYPE_TX = 1
+    OC_TYPE_BLOCK = 0,//block
+    OC_TYPE_TX = 1  //transaction
  } ;
 
 enum OKCoin_Action {
-    OC_ACTION_NEW = 0,
-    OC_ACTION_UPDATE = 1,
-    OC_ACTION_REMOVE = 2
+    OC_ACTION_NEW = 0,  //tx/block产生
+    OC_ACTION_CONFIRM = 1,//tx 确认
+    OC_ACTION_ORPHANE = -1,//tx/block 孤立
  } ;
 
 
