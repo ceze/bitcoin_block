@@ -1179,10 +1179,6 @@ void static PruneOrphanBlocks()
     delete it->second;
     mapOrphanBlocksByPrev.erase(it);
     mapOrphanBlocks.erase(hash);
-#ifdef OKCOIN_LOG
-     OKCoin_Log_EarseOrphaneBlk(hash.ToString());
-#endif
-   
 }
 
 int64_t GetBlockValue(int nHeight, int64_t nFees)
@@ -1986,6 +1982,9 @@ bool static DisconnectTip(CValidationState &state) {
     // 0-confirmed or conflicted:
     BOOST_FOREACH(const CTransaction &tx, block.vtx) {
         SyncWithWallets(tx.GetHash(), tx, NULL);
+   #ifdef OKCOIN_LOG
+         OKCoin_Log_EarseOrphaneTx(tx.GetHash().ToString());
+   #endif
     }
     return true;
 }
@@ -2030,10 +2029,17 @@ bool static ConnectTip(CValidationState &state, CBlockIndex *pindexNew) {
     // to conflicted:
     BOOST_FOREACH(const CTransaction &tx, txConflicted) {
         SyncWithWallets(tx.GetHash(), tx, NULL);
+#ifdef OKCOIN_LOG
+      OKCoin_Log_EarseOrphaneTx(tx.GetHash().ToString());
+#endif
     }
     // ... and about transactions that got confirmed:
     BOOST_FOREACH(const CTransaction &tx, block.vtx) {
         SyncWithWallets(tx.GetHash(), tx, &block);
+#define OKCOIN_LOG
+      OKCoin_Log_Event(OC_TYPE_TX, OC_ACTION_CONFIRM, tx.GetHash().ToString(), "127.0.0.1");
+#endif
+
     }
     return true;
 }
