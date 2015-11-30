@@ -777,6 +777,13 @@ bool AppInit2(boost::thread_group& threadGroup)
     BOOST_FOREACH(string strDest, mapMultiArgs["-seednode"])
         AddOneShot(strDest);
 
+    // ********************** step6.5 init mysql connect
+    //OKCoin记录tx
+    #ifdef OKCOIN_LOG
+        OKCoin_Log_init();
+    #endif
+
+
     // ********************************************************* Step 7: load block chain
 
     fReindex = GetBoolArg("-reindex", false);
@@ -1080,12 +1087,6 @@ bool AppInit2(boost::thread_group& threadGroup)
            addrman.size(), GetTimeMillis() - nStart);
 
     // ********************************************************* Step 11: start node
-
-//OKCoin记录tx
-#ifdef OKCOIN_LOG
-    OKCoin_Log_init();
-#endif
-
     if (!CheckDiskSpace())
         return false;
 
