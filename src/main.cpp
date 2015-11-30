@@ -1687,7 +1687,7 @@ bool DisconnectBlock(CBlock& block, CValidationState& state, CBlockIndex* pindex
 
     if (pfClean) {
 #ifdef OKCOIN_LOG
-         OKCoin_Log_EarseOrphaneBlk(mi->second->hashBlock.ToString());
+         OKCoin_Log_EarseOrphaneBlk(pindex->GetBlockHash().ToString());
 #endif
         *pfClean = fClean;
         return true;
